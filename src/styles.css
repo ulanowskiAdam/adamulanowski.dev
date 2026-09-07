@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+:root {
+  --ink: #151716;
+  --paper: #f2efe5;
+  --lime: #d3ff48;
+  --coral: #ff705d;
+}
+
+@theme {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-lime: var(--lime);
+  --color-coral: var(--coral);
+  --font-display: 'Arial Narrow', 'Avenir Next Condensed', sans-serif;
+  --font-body: 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+body {
+  margin: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background-color: var(--lime);
+  color: var(--ink);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.7rem, 6vw, 6.5rem);
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+.hero-title {
+  font-size: clamp(4.2rem, 11vw, 10rem);
+  letter-spacing: -0.07em;
+  line-height: 0.82;
+}
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--lime);
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 1rem 1.25rem;
+  text-transform: uppercase;
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.button-primary:hover {
+  background-color: var(--paper);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .button-primary {
+    transition: none;
+  }
+}

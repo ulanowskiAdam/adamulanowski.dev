@@ -1,0 +1,66 @@
+<section
+	class="hero relative isolate min-h-[max(720px,100svh)] overflow-hidden bg-ink px-6 pb-10 pt-6 text-paper sm:px-10 lg:px-16"
+	aria-labelledby="hero-title">
+	<div class="hero-grid absolute inset-0 -z-10 opacity-30" aria-hidden="true"></div>
+	<div class="hero-glow hero-glow-lime absolute -left-32 top-20 -z-10 size-96 rounded-full blur-3xl"
+		aria-hidden="true"></div>
+	<div class="hero-glow hero-glow-coral absolute -right-40 bottom-0 -z-10 size-[32rem] rounded-full blur-3xl"
+		aria-hidden="true"></div>
+
+	<nav class="mx-auto flex max-w-7xl items-center justify-between" aria-label="Główna nawigacja">
+		<a class="font-display text-lg font-bold tracking-[-0.04em]" href="/">A<span class="text-lime">.</span></a>
+		<a class="font-mono text-xs uppercase tracking-[0.14em] text-paper/60 transition-colors hover:text-lime"
+			href="#about">Poznaj mnie <span aria-hidden="true">↘</span></a>
+	</nav>
+
+	<div class="mx-auto grid max-w-7xl items-center gap-10 pt-16 sm:pt-20 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pt-20">
+		<div class="max-w-2xl">
+			<p class="eyebrow text-lime"><span
+					class="mr-2 inline-block size-2 rounded-full bg-lime align-middle"></span> Interaktywna wizytówka
+			</p>
+			<h1 id="hero-title" class="hero-title mt-7 font-display font-bold uppercase">Sformatuj<br /><span
+					class="text-lime">Swój biznes</span></h1>
+			<p class="mt-8 max-w-lg text-lg leading-8 text-paper/65 sm:text-xl">Zobacz, jak może wyglądać cyfrowa wersja
+				Twojego biznesu.</p>
+			<div class="mt-10 flex flex-wrap items-center gap-5">
+				<a class="button-primary" href="#about">Zobacz, co możemy stworzyć <span aria-hidden="true">↗</span></a>
+				<span class="font-mono text-xs uppercase tracking-[0.14em] text-paper/45">Doświadczenie / 01</span>
+			</div>
+		</div>
+
+		<div class="relative mx-auto flex w-full max-w-[620px] items-center justify-center lg:justify-end"
+			aria-label="Podgląd przyszłego obiektu 3D" role="img">
+			<div
+				class="scene-frame relative aspect-square w-full max-w-[530px] overflow-hidden border border-paper/20 bg-paper/[0.04]">
+				<div
+					class="scene-label absolute left-5 top-5 z-10 font-mono text-[10px] uppercase tracking-[0.18em] text-paper/45">
+					Scena / oczekuje na Twój kierunek</div>
+				<div class="scene-axis scene-axis-x absolute left-1/2 top-0 h-full w-px bg-paper/10"></div>
+				<div class="scene-axis scene-axis-y absolute left-0 top-1/2 h-px w-full bg-paper/10"></div>
+				<div
+					class="scene-object absolute left-1/2 top-1/2 size-[46%] -translate-x-1/2 -translate-y-1/2 rotate-12 border-2 border-lime bg-lime/10 shadow-[18px_18px_0_#ff705d]">
+					<div class="absolute inset-[12%] border border-lime/60"></div>
+					<div class="absolute -right-[10%] top-[18%] h-px w-[36%] bg-lime"></div>
+					<div class="absolute -left-[18%] bottom-[22%] h-px w-[42%] bg-coral"></div>
+					<div
+						class="absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime shadow-[0_0_28px_8px_rgba(211,255,72,0.35)]">
+					</div>
+				</div>
+				<div
+					class="absolute bottom-5 left-5 right-5 flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-paper/45">
+					<span>Future object / 3D</span>
+					<span>Awaiting input</span>
+				</div>
+			</div>
+			<span
+				class="absolute -bottom-2 right-0 hidden max-w-32 text-right font-mono text-xs uppercase leading-5 tracking-[0.12em] text-coral sm:block">Twój
+				biznes<br />zaczyna się tutaj</span>
+		</div>
+	</div>
+
+	<a class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-paper/45 transition-colors hover:text-lime"
+		href="#about">
+		<span>Przewiń, żeby wejść głębiej</span>
+		<span class="scroll-line h-10 w-px bg-paper/40" aria-hidden="true"></span>
+	</a>
+</section>

@@ -1,0 +1,70 @@
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(242, 239, 229, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(242, 239, 229, 0.08) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+.hero-glow-lime {
+  background: #d3ff48;
+  opacity: 0.12;
+}
+
+.hero-glow-coral {
+  background: #ff705d;
+  opacity: 0.12;
+}
+
+.scene-frame {
+  animation: scene-float 8s ease-in-out infinite;
+}
+
+.scene-object {
+  animation: object-drift 10s ease-in-out infinite alternate;
+}
+
+.scroll-line {
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+
+@keyframes scene-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes object-drift {
+  from {
+    transform: translate(-50%, -50%) rotate(12deg) scale(0.96);
+  }
+  to {
+    transform: translate(-50%, -54%) rotate(25deg) scale(1.04);
+  }
+}
+
+@keyframes scroll-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scaleY(0.7);
+    transform-origin: top;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-frame,
+  .scene-object,
+  .scroll-line {
+    animation: none;
+  }
+}
