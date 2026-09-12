@@ -1,66 +1,124 @@
-<section
-	class="hero relative isolate min-h-[max(720px,100svh)] overflow-hidden bg-ink px-6 pb-10 pt-6 text-paper sm:px-10 lg:px-16"
-	aria-labelledby="hero-title">
-	<div class="hero-grid absolute inset-0 -z-10 opacity-30" aria-hidden="true"></div>
-	<div class="hero-glow hero-glow-lime absolute -left-32 top-20 -z-10 size-96 rounded-full blur-3xl"
-		aria-hidden="true"></div>
-	<div class="hero-glow hero-glow-coral absolute -right-40 bottom-0 -z-10 size-[32rem] rounded-full blur-3xl"
-		aria-hidden="true"></div>
+@let step = store.step();
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-glow glow-a" aria-hidden="true"></div>
+  <div class="hero-glow glow-b" aria-hidden="true"></div>
+  <nav class="hero-nav" aria-label="Główna nawigacja">
+    <a class="brand" href="/" aria-label="Adam Ułanowski — strona główna">A<span>.</span></a>
+    <div class="nav-meta"><span>AU / SYSTEM 26</span><a href="#about">Poznaj autora ↘</a></div>
+  </nav>
 
-	<nav class="mx-auto flex max-w-7xl items-center justify-between" aria-label="Główna nawigacja">
-		<a class="font-display text-lg font-bold tracking-[-0.04em]" href="/">A<span class="text-lime">.</span></a>
-		<a class="font-mono text-xs uppercase tracking-[0.14em] text-paper/60 transition-colors hover:text-lime"
-			href="#about">Poznaj mnie <span aria-hidden="true">↘</span></a>
-	</nav>
+  <div class="experience" [class.active]="step > 0">
+    <div class="copy-panel">
+      @if (step === 0) {
+      <div class="intro enter">
+        <p class="eyebrow lime"><i class="status-dot"></i> Signature experience / online</p>
+        <h1 id="hero-title">Zobacz, co możemy<br /><em>zbudować dla Twojej firmy</em></h1>
+        <p class="lead">Wybierz branżę i proces, który warto usprawnić. W minutę otrzymasz koncepcję aplikacji,
+          integracji lub automatyzacji.</p>
+        <button class="primary-button" type="button" (click)="start()">Stwórz swoją koncepcję <span>↗</span></button>
+        <p class="time-note">4 krótkie kroki · około 60 sekund</p>
+      </div>
+      } @else if (step < 4) { <div class="configurator enter">
+        <div class="progress-head">
+          <p class="eyebrow lime">Konfigurator / 0{{ step }}</p><span>{{ step }} z 3</span>
+        </div>
+        <div class="progress-track" aria-hidden="true"><i [style.width.%]="step * 25"></i></div>
 
-	<div class="mx-auto grid max-w-7xl items-center gap-10 pt-16 sm:pt-20 lg:grid-cols-[0.9fr_1.1fr] lg:gap-8 lg:pt-20">
-		<div class="max-w-2xl">
-			<p class="eyebrow text-lime"><span
-					class="mr-2 inline-block size-2 rounded-full bg-lime align-middle"></span> Interaktywna wizytówka
-			</p>
-			<h1 id="hero-title" class="hero-title mt-7 font-display font-bold uppercase">Sformatuj<br /><span
-					class="text-lime">Swój biznes</span></h1>
-			<p class="mt-8 max-w-lg text-lg leading-8 text-paper/65 sm:text-xl">Zobacz, jak może wyglądać cyfrowa wersja
-				Twojego biznesu.</p>
-			<div class="mt-10 flex flex-wrap items-center gap-5">
-				<a class="button-primary" href="#about">Zobacz, co możemy stworzyć <span aria-hidden="true">↗</span></a>
-				<span class="font-mono text-xs uppercase tracking-[0.14em] text-paper/45">Doświadczenie / 01</span>
-			</div>
-		</div>
+        @if (step === 1) {
+        <fieldset>
+          <legend><small>Wybierz branżę</small>Gdzie działasz?</legend>
+          <div class="option-list">
+            @for (item of store.industries; track item.id; let index = $index) {
+            <button type="button" class="option" [class.selected]="store.industryId() === item.id"
+              [attr.aria-pressed]="store.industryId() === item.id" (click)="selectIndustry(item.id)">
+              <span>0{{ index + 1 }}</span><span class="ui-icon"><ng-container
+                  *ngComponentOutlet="item.icon"></ng-container></span><b>{{ item.label }}</b><i>↗</i>
+            </button>
+            }
+          </div>
+        </fieldset>
+        }
+        @if (step === 2) {
+        <fieldset>
+          <legend><small>Wybierz rozwiązania</small>Co warto usprawnić?</legend>
+          <p class="field-hint">Możesz wybrać kilka elementów. Połączymy je w jedną spójną koncepcję.</p>
+          <div class="feature-grid">
+            @for (item of store.addons(); track item.id) {
+            <button type="button" class="feature-option" [class.selected]="store.selectedAddonIds().has(item.id)"
+              [attr.aria-pressed]="store.selectedAddonIds().has(item.id)" (click)="toggleAddon(item.id)">
+              <span class="ui-icon feature-icon"><ng-container *ngComponentOutlet="item.icon"></ng-container></span>
+              <span class="feature-copy"><strong>{{ item.label }}</strong><small>{{ item.description }}</small></span>
+              <i aria-hidden="true">+</i>
+            </button>
+            }
+          </div>
+        </fieldset>
+        }
+        @if (step === 3) {
+        <form (ngSubmit)="showResult()">
+          <div class="form-title"><small>Ostatni krok</small>
+            <h2>Dopasujmy koncepcję do Twojej firmy</h2>
+          </div>
+          <label>Jak masz na imię?<input name="name" [(ngModel)]="name" autocomplete="name" required
+              placeholder="Adam" /></label>
+          <label>Telefon lub e-mail<input name="contact" [(ngModel)]="contact" required
+              placeholder="Twój kontakt" /></label>
+          <label>W jakim mieście działasz?<input name="city" [(ngModel)]="city" autocomplete="address-level2" required
+              placeholder="Warszawa" /></label>
+          <button class="result-button" type="submit">Pokaż moją koncepcję <span>↗</span></button>
+          <p class="privacy-note">Dane pozostają w formularzu. Kontakt inicjujesz samodzielnie w następnym kroku.</p>
+        </form>
+        }
+        <div class="step-actions">
+          @if (step > 1) { <button type="button" class="back-button" (click)="back()">← Wstecz</button> }
+          @if (step < 3) { <button type="button" class="next-button" (click)="next()"
+            [disabled]="(step === 1 && !store.industryId()) || (step === 2 && store.selectedAddonIds().size === 0)">
+            Dalej <span>→</span></button>
+            }
+        </div>
+    </div>
+    } @else {
+    <div class="result-copy enter">
+      <p class="eyebrow lime"><i class="status-dot"></i> Koncepcja gotowa</p>
+      <h2>Pomysł na cyfrowe usprawnienie Twojej firmy</h2>
+      <dl class="result-summary">
+        <div>
+          <dt>Branża</dt>
+          <dd>{{ store.industry()?.label }}</dd>
+        </div>
+        <div>
+          <dt>Rozwiązania</dt>
+          <dd><span class="result-tags">@for (item of store.selectedAddons(); track item.id) { <span>{{ item.label
+                }}</span> }</span></dd>
+        </div>
+      </dl>
+      <p class="result-lead">Wybrane elementy możemy połączyć w jedną aplikację dopasowaną do sposobu działania Twojej
+        firmy.</p>
+      <a class="primary-button" [href]="mailtoLink">Otwórz gotową wiadomość <span>↗</span></a>
+      <button class="restart-button" type="button" (click)="restart()">Zacznij od nowa</button>
+    </div>
+    }
+  </div>
 
-		<div class="relative mx-auto flex w-full max-w-[620px] items-center justify-center lg:justify-end"
-			aria-label="Podgląd przyszłego obiektu 3D" role="img">
-			<div
-				class="scene-frame relative aspect-square w-full max-w-[530px] overflow-hidden border border-paper/20 bg-paper/[0.04]">
-				<div
-					class="scene-label absolute left-5 top-5 z-10 font-mono text-[10px] uppercase tracking-[0.18em] text-paper/45">
-					Scena / oczekuje na Twój kierunek</div>
-				<div class="scene-axis scene-axis-x absolute left-1/2 top-0 h-full w-px bg-paper/10"></div>
-				<div class="scene-axis scene-axis-y absolute left-0 top-1/2 h-px w-full bg-paper/10"></div>
-				<div
-					class="scene-object absolute left-1/2 top-1/2 size-[46%] -translate-x-1/2 -translate-y-1/2 rotate-12 border-2 border-lime bg-lime/10 shadow-[18px_18px_0_#ff705d]">
-					<div class="absolute inset-[12%] border border-lime/60"></div>
-					<div class="absolute -right-[10%] top-[18%] h-px w-[36%] bg-lime"></div>
-					<div class="absolute -left-[18%] bottom-[22%] h-px w-[42%] bg-coral"></div>
-					<div
-						class="absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime shadow-[0_0_28px_8px_rgba(211,255,72,0.35)]">
-					</div>
-				</div>
-				<div
-					class="absolute bottom-5 left-5 right-5 flex items-end justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-paper/45">
-					<span>Future object / 3D</span>
-					<span>Awaiting input</span>
-				</div>
-			</div>
-			<span
-				class="absolute -bottom-2 right-0 hidden max-w-32 text-right font-mono text-xs uppercase leading-5 tracking-[0.12em] text-coral sm:block">Twój
-				biznes<br />zaczyna się tutaj</span>
-		</div>
-	</div>
-
-	<a class="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-paper/45 transition-colors hover:text-lime"
-		href="#about">
-		<span>Przewiń, żeby wejść głębiej</span>
-		<span class="scroll-line h-10 w-px bg-paper/40" aria-hidden="true"></span>
-	</a>
+  <div class="visual-panel" [class.gastro-panel]="store.industryId() === 'gastronomia'"
+    [class.gastro-solutions]="store.industryId() === 'gastronomia' && step >= 2">
+    <div class="scene-meta"><span>Three.js / digital twin</span><span>0{{ step }}/05</span></div>
+    <app-business-scene [industry]="store.industryId()" [addonIds]="store.selectedAddonIds()"
+      [addonLabels]="store.addons()" [activeAddonId]="store.activeAddonId()" [step]="step" />
+    <div class="reticle reticle-a" aria-hidden="true"></div>
+    <div class="reticle reticle-b" aria-hidden="true"></div>
+    @if (store.industryId() === 'gastronomia' && step >= 2) {
+    <app-cafe-tiles [selected]="store.selectedAddonIds()" (toggle)="toggleAddon($event)" />
+    }
+    <div class="visual-map" aria-hidden="true">
+      @if (store.industry() && step === 1) { <span class="map-industry"><i>01 / rdzeń</i>{{ store.industry()?.sceneLabel
+        }}</span> }
+    </div>
+    <div class="scene-caption"><span>{{ step === 0 ? 'Core awaiting input' : step === 4 ? 'Digital twin ready' :
+        'Synchronizacja w czasie rzeczywistym' }}</span><span class="live"><i></i>{{ step === 4 ? 'Complete' : 'Live'
+        }}</span></div>
+  </div>
+  </div>
+  <a class="scroll-cue" href="#about"><span>Kim jest autor?</span><i></i></a>
 </section>
