@@ -571,7 +571,7 @@ function cafeModel(p: ScenePrimitivesContract, kind: number): BuiltScene {
   return { group };
 }
 
-export const ADDON_SCENE_BUILDERS: Record<AddonId, AddonSceneBuilder> = {
+const addonBuilders: Record<AddonId, AddonSceneBuilder> = {
   'gastronomia-zamowienia-online': (p) => cafeModel(p, 0),
   'gastronomia-rezerwacje': (p) => cafeModel(p, 1),
   'gastronomia-asystent-ai': (p) => cafeModel(p, 2),
@@ -585,3 +585,26 @@ export const ADDON_SCENE_BUILDERS: Record<AddonId, AddonSceneBuilder> = {
   'fachowcy-status-realizacji': (p) => clipboard(p, true),
   'fachowcy-obsluga-zlecen': workflow,
 };
+
+// Fit every module to the same envelope without changing its proportions.
+// Apply only when oversized; existing animated reliefs retain their local coordinates.
+export const ADDON_SCENE_BUILDERS = Object.fromEntries(
+  Object.entries(addonBuilders).map(([id, build]) => [
+    id,
+    (p: ScenePrimitivesContract) => {
+      const built = build(p);
+      const bounds = new THREE.Box3().setFromObject(built.group);
+      const scale = Math.min(
+        1,
+        0.5 / Math.max(Math.abs(bounds.min.x), Math.abs(bounds.max.x)),
+        0.51 / Math.max(Math.abs(bounds.min.y), Math.abs(bounds.max.y)),
+        0.3 / Math.max(Math.abs(bounds.min.z), Math.abs(bounds.max.z)),
+      );
+      if (scale < 1) {
+        const transform = new THREE.Matrix4().makeScale(scale, scale, scale);
+        built.group.children.forEach((child) => child.applyMatrix4(transform));
+      }
+      return built;
+    },
+  ]),
+) as Record<AddonId, AddonSceneBuilder>;

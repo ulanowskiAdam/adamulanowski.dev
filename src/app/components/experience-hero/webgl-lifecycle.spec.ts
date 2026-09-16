@@ -71,7 +71,7 @@ describe('scene frame scheduling', () => {
     const runtime = new BusinessSceneRuntime(
       { nativeElement: document.createElement('div') },
       { nativeElement: document.createElement('canvas') },
-      { industry: () => null, addonIds: () => new Set(), activeAddonId: () => null, step: () => 0 },
+      { industry: () => null, step: () => 0 },
     );
     // Use a renderer double: these tests exercise scheduling without requiring a GPU.
     const state = runtime as any;
@@ -82,6 +82,54 @@ describe('scene frame scheduling', () => {
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
     return { runtime, state };
   }
+
+  it('shows each industry as one complete model and uses identical step transitions', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const transforms = ['gastronomia', 'wizyty', 'fachowcy'].map(id => {
+      const { runtime, state } = scene();
+      state.currentStep = 2;
+      state.swapIndustry(id);
+      expect(state.industries).toHaveLength(1);
+      expect(state.industries[0].opacity).toBe(1);
+      expect(state.industries[0].scale).toBe(1);
+      state.industries[0].group.traverse((object: THREE.Object3D) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach((material: THREE.Material) =>
+          expect(material.opacity).toBe(material.userData['baseOpacity'] ?? 1),
+        );
+      });
+      const frames = [];
+      for (let index = 0; index < 60; index++) {
+        const frame = { time: index / 60, delta: 1 / 60, reducedMotion: false };
+        state.updateIndustries(frame);
+        state.updateCamera(frame);
+        const model = state.industries[0].group;
+        frames.push([model.position.toArray(), model.scale.toArray(),
+          state.camera.position.toArray(), state.world.rotation.toArray()]);
+      }
+      runtime.destroy();
+      return frames;
+    });
+    expect(transforms[0]).toEqual(transforms[1]);
+    expect(transforms[1]).toEqual(transforms[2]);
+  });
+
+  it('prebuilds mock-ups once and reuses them when the selection changes', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.prepareMockups();
+    const gastronomy = state.mockups.get('gastronomia') as { group: THREE.Group };
+
+    state.swapIndustry('gastronomia');
+    state.swapIndustry('wizyty');
+    state.swapIndustry('gastronomia');
+
+    expect(state.mockups.size).toBe(4);
+    expect(state.industries).toHaveLength(1);
+    expect(state.industries[0].group).toBe(gastronomy.group);
+    runtime.destroy();
+  });
 
   it('coalesces invalidations and sleeps after a reduced-motion frame', () => {
     const raf = vi.fn().mockReturnValue(1);

@@ -14,9 +14,9 @@ describe('hero configurator', () => {
     const store = TestBed.inject(ConfiguratorStore);
     const solutionIds = store.industries.flatMap((industry) => industry.addons.map((addon) => addon.id));
 
-    expect(store.industries).toHaveLength(4);
+    expect(store.industries).toHaveLength(3);
     expect(store.industries.every((industry) => industry.addons.length === 4)).toBe(true);
-    expect(new Set(solutionIds).size).toBe(16);
+    expect(new Set(solutionIds).size).toBe(12);
   });
 
   it('maps every industry and solution to a buildable Three.js scene and a stable slot', () => {
@@ -69,7 +69,7 @@ describe('hero configurator', () => {
       expect(bounds.min.z).toBeGreaterThan(floor.min.z);
       expect(bounds.max.z).toBeLessThan(floor.max.z);
     });
-    expect(group.getObjectByName('cafe-barista')).toBeDefined();
+    expect(group.getObjectByName('cafe-customer')).toBeDefined();
     disposeGroup(group);
   });
 
@@ -131,27 +131,25 @@ describe('hero configurator', () => {
     hero.selectIndustry('fachowcy');
     hero.toggleAddon('fachowcy-formularz-zapytania');
     hero.toggleAddon('fachowcy-obsluga-zlecen');
-    hero.selectMood('Profesjonalnie i premium');
+
     hero.name = 'Jan';
     hero.contact = 'jan@example.com';
     hero.city = 'Gdańsk';
     hero.showResult();
 
     const mailto = decodeURIComponent(hero.mailtoLink);
-    expect(hero.store.step()).toBe(5);
+    expect(hero.store.step()).toBe(4);
     expect(mailto).toContain('Imię: Jan');
     expect(mailto).toContain('Kontakt: jan@example.com');
     expect(mailto).toContain('Miasto: Gdańsk');
     expect(mailto).toContain('Branża: Fachowcy i usługi');
     expect(mailto).toContain('Inteligentny formularz zapytania');
     expect(mailto).toContain('Automatyzacja obsługi zleceń');
-    expect(mailto).toContain('Charakter wizualny: Profesjonalnie i premium');
 
     hero.restart();
     expect(hero.store.step()).toBe(0);
     expect(hero.store.industryId()).toBeNull();
     expect(hero.store.selectedAddonIds().size).toBe(0);
-    expect(hero.store.mood()).toBeNull();
     expect(hero.name).toBe('');
     expect(hero.contact).toBe('');
     expect(hero.city).toBe('');

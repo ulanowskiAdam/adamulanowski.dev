@@ -1,17 +1,14 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { ADDON_SCENE_BUILDERS } from './addon-scenes';
-import { AddonId, IndustryId } from './configurator.store';
+import { IndustryId } from './configurator.store';
 import { buildCoreScene, INDUSTRY_SCENE_BUILDERS } from './industry-scenes';
 import {
-  ADDON_SLOT_INDEX,
-  ADDON_SLOTS,
   CAMERA_PRESETS,
   damp,
   INDUSTRY_ROTATIONS,
 } from './scene-layout';
 import { disposeGroup, ScenePrimitives, setGroupOpacity } from './scene-primitives';
-import { AddonRuntime, BuiltScene, IndustryRuntime, SceneFrame } from './scene-types';
+import { IndustryRuntime, SceneFrame } from './scene-types';
 
 interface TransitioningIndustry extends IndustryRuntime {
   opacity: number;
@@ -26,7 +23,6 @@ export class BusinessSceneRuntime {
   private scene?: THREE.Scene;
   private world?: THREE.Group;
   private platform?: THREE.Group;
-  private addonLayer?: THREE.Group;
   private stars?: THREE.Points;
   private keyLight?: THREE.PointLight;
   private rimLight?: THREE.PointLight;
@@ -40,7 +36,6 @@ export class BusinessSceneRuntime {
   private startedAt = 0;
   private previousFrame = 0;
   private currentIndustry: IndustryId | null | undefined;
-  private activeAddon: AddonId | null = null;
   private currentStep = 0;
   private reducedMotion = false;
   private narrowPanel = false;
@@ -50,11 +45,8 @@ export class BusinessSceneRuntime {
   private readonly lookTarget = new THREE.Vector3(0, -0.08, 0);
   private readonly desiredPosition = new THREE.Vector3();
   private readonly desiredTarget = new THREE.Vector3();
-  private readonly labelAnchor = new THREE.Vector3();
-  private readonly labelCorner = new THREE.Vector3();
-  private readonly labelBounds = new THREE.Box3();
   private readonly industries: TransitioningIndustry[] = [];
-  private readonly addons = new Map<AddonId, AddonRuntime>();
+  private readonly mockups = new Map<IndustryId | null, IndustryRuntime>();
 
   private readonly pointerMove = (event: PointerEvent): void => {
     if (!this.pointerEnabled) return;
@@ -79,19 +71,24 @@ export class BusinessSceneRuntime {
     private readonly sceneCanvas: { nativeElement: HTMLCanvasElement },
     private readonly state: {
       industry: () => IndustryId | null;
-      addonIds: () => ReadonlySet<AddonId>;
-      activeAddonId: () => AddonId | null;
       step: () => number;
     },
   ) {}
 
   update(): void {
     if (!this.world || this.destroyed) return;
-    this.activeAddon = this.state.activeAddonId();
-    this.currentStep = this.state.step();
-    const industry = this.state.industry();
+    this.sync(this.state.industry(), this.state.step());
+  }
+
+  sync(industry: IndustryId | null, step: number): void {
+    if (!this.world || this.destroyed) return;
+    this.currentStep = step;
     if (industry !== this.currentIndustry) this.swapIndustry(industry);
-    this.syncAddons(this.state.addonIds());
+    // Paint the already prepared group inside the click handler. Waiting for
+    // the next animation frame leaves the previous mock-up visible for one
+    // extra browser paint while the labels have already changed.
+    if (this.renderer && this.scene && this.camera)
+      this.renderer.render(this.scene, this.camera);
     this.invalidate();
   }
 
@@ -104,13 +101,15 @@ export class BusinessSceneRuntime {
     const host = this.host?.nativeElement;
     host?.removeEventListener('pointermove', this.pointerMove);
     host?.removeEventListener('pointerleave', this.pointerLeave);
+    this.mockups.forEach((mockup) => mockup.group.removeFromParent());
     if (this.scene) disposeGroup(this.scene);
+    this.mockups.forEach((mockup) => disposeGroup(mockup.group));
+    this.mockups.clear();
     this.intersectionObserver?.disconnect();
     document.removeEventListener('visibilitychange', this.visibilityChange);
     if (this.scene) this.scene.environment = null;
     this.environmentTarget?.dispose();
     this.industries.length = 0;
-    this.addons.clear();
     this.scene?.clear();
     this.renderer?.dispose();
     this.renderer = undefined;
@@ -167,16 +166,13 @@ export class BusinessSceneRuntime {
     this.platform = new THREE.Group();
     this.world.add(this.platform);
     this.buildPlatform(this.platform);
-    this.addonLayer = new THREE.Group();
-    this.world.add(this.addonLayer);
     this.buildLighting();
+    this.prepareMockups();
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);
     this.resize();
     this.swapIndustry(this.state.industry());
-    this.syncAddons(this.state.addonIds());
-    this.activeAddon = this.state.activeAddonId();
     this.currentStep = this.state.step();
     this.startedAt = performance.now();
     this.previousFrame = this.startedAt;
@@ -253,57 +249,40 @@ export class BusinessSceneRuntime {
   private swapIndustry(id: IndustryId | null): void {
     this.currentIndustry = id;
     if (this.platform) this.platform.visible = false;
-    this.industries.forEach((runtime) => (runtime.exiting = true));
-    const built = id
-      ? INDUSTRY_SCENE_BUILDERS[id](this.primitives)
-      : buildCoreScene(this.primitives);
-    built.group.scale.setScalar(this.reducedMotion ? 1 : 0.01);
-    setGroupOpacity(built.group, this.reducedMotion ? 1 : 0);
+    // Replace the complete mock-up between frames. Fading every material and
+    // scaling the group from almost zero made complex scenes look as if they
+    // were being assembled in two separate passes.
+    this.industries.forEach((runtime) => {
+      this.world?.remove(runtime.group);
+    });
+    this.industries.length = 0;
+    const built = this.getMockup(id);
+    built.group.scale.setScalar(this.currentStep >= 2 ? 1.15 : 1);
+    setGroupOpacity(built.group, 1);
     this.world?.add(built.group);
     this.industries.push({
       ...built,
       id,
-      opacity: this.reducedMotion ? 1 : 0,
-      scale: this.reducedMotion ? 1 : 0.01,
+      opacity: 1,
+      scale: 1,
       exiting: false,
     });
   }
 
-  private syncAddons(selected: ReadonlySet<AddonId>): void {
-    if (this.currentIndustry === 'gastronomia') selected = new Set();
-    this.addons.forEach((runtime, id) => (runtime.exiting = !selected.has(id)));
-    selected.forEach((id) => {
-      const existing = this.addons.get(id);
-      if (existing) {
-        existing.exiting = false;
-        return;
-      }
-      const built = ADDON_SCENE_BUILDERS[id](this.primitives);
-      const slotIndex = ADDON_SLOT_INDEX[id];
-      const slot = ADDON_SLOTS[slotIndex];
-      built.group.position.set(slot[0], slot[1] - (this.reducedMotion ? 0 : 0.15), slot[2]);
-      built.group.scale.setScalar(this.reducedMotion ? 1 : 0.01);
-      const activeIndicator = this.primitives.box(
-        built.group,
-        [0.94, 0.055, 0.04],
-        [0, -0.475, 0.29],
-        this.primitives.roleMaterial('accent'),
-        false,
-      );
-      (activeIndicator.material as THREE.MeshPhysicalMaterial).emissiveIntensity = 0.15;
-      // Solid models enter by scaling, avoiding per-mesh alpha sorting of reliefs.
-      setGroupOpacity(built.group, 1);
-      this.addonLayer?.add(built.group);
-      this.addons.set(id, {
-        ...built,
-        id,
-        slotIndex,
-        activeIndicator,
-        opacity: this.reducedMotion ? 1 : 0,
-        scale: this.reducedMotion ? 1 : 0.01,
-        exiting: false,
-      });
-    });
+  private prepareMockups(): void {
+    this.getMockup(null);
+    (Object.keys(INDUSTRY_SCENE_BUILDERS) as IndustryId[]).forEach((id) => this.getMockup(id));
+  }
+
+  private getMockup(id: IndustryId | null): IndustryRuntime {
+    const cached = this.mockups.get(id);
+    if (cached) return cached;
+    const built = id
+      ? INDUSTRY_SCENE_BUILDERS[id](this.primitives)
+      : buildCoreScene(this.primitives);
+    const mockup: IndustryRuntime = { ...built, id };
+    this.mockups.set(id, mockup);
+    return mockup;
   }
 
   private readonly visibilityChange = (): void => {
@@ -332,11 +311,9 @@ export class BusinessSceneRuntime {
     };
     this.previousFrame = now;
     this.updateIndustries(frame);
-    this.updateAddons(frame);
     this.updateCamera(frame);
     if (this.stars && !this.reducedMotion) this.stars.rotation.y -= delta * 0.018;
     this.renderer.render(this.scene, this.camera);
-    this.updateLabels();
     if (!this.reducedMotion) this.invalidate();
   };
 
@@ -348,11 +325,19 @@ export class BusinessSceneRuntime {
       const previousOpacity = runtime.opacity;
       runtime.opacity = this.reducedMotion ? target : damp(runtime.opacity, target, 8, frame.delta);
       if (Math.abs(runtime.opacity - target) < 0.001) runtime.opacity = target;
-      const cafe = runtime.id === 'gastronomia';
-      const contextScale = cafe ? 1 : this.currentStep >= 2 ? 0.65 : 1;
-      runtime.group.scale.setScalar(runtime.scale * contextScale);
-      runtime.group.position.y = cafe ? 0 : this.currentStep >= 2 ? -0.25 : 0;
-      runtime.group.position.z = cafe ? 0 : this.currentStep >= 2 ? -0.35 : 0;
+      const contextScale = this.currentStep >= 2 ? 1.15 : 1;
+      const targetScale = runtime.scale * contextScale;
+      runtime.group.scale.setScalar(
+        this.reducedMotion ? targetScale : damp(runtime.group.scale.x, targetScale, 7, frame.delta),
+      );
+      const targetY = 0;
+      runtime.group.position.y = this.reducedMotion
+        ? targetY
+        : damp(runtime.group.position.y, targetY, 7, frame.delta);
+      const targetZ = 0;
+      runtime.group.position.z = this.reducedMotion
+        ? targetZ
+        : damp(runtime.group.position.z, targetZ, 7, frame.delta);
       // Some model animators multiply material opacity, so restore their base each frame.
       if (runtime.animate || runtime.opacity !== previousOpacity)
         setGroupOpacity(runtime.group, runtime.opacity);
@@ -365,77 +350,8 @@ export class BusinessSceneRuntime {
     }
   }
 
-  private updateAddons(frame: SceneFrame): void {
-    this.addons.forEach((runtime, id) => {
-      const active = id === this.activeAddon && !runtime.exiting;
-      const cafe = id.startsWith('gastronomia-');
-      const targetScale = runtime.exiting ? 0 : (active ? 1.05 : 1) * 0.72 * (cafe ? 0.87 : 1);
-      const targetOpacity = runtime.exiting ? 0 : 1;
-      runtime.scale = this.reducedMotion
-        ? targetScale
-        : damp(runtime.scale, targetScale, 9, frame.delta);
-      runtime.opacity = this.reducedMotion
-        ? targetOpacity
-        : damp(runtime.opacity, targetOpacity, 10, frame.delta);
-      const slot = ADDON_SLOTS[runtime.slotIndex];
-      const targetY = slot[1] - (cafe ? 0.07 : 0);
-      runtime.group.position.y = this.reducedMotion
-        ? targetY
-        : damp(runtime.group.position.y, targetY, 9, frame.delta);
-      runtime.group.scale.setScalar(runtime.scale);
-      runtime.activeIndicator.visible = active && !cafe;
-      // Cancel the industry's yaw for legible faces while keeping a small 3D tilt.
-      runtime.group.rotation.y =
-        -this.world!.rotation.y + (runtime.slotIndex % 2 === 0 ? 0.1 : -0.1);
-      runtime.animate?.(frame);
-      if (runtime.exiting && runtime.opacity < 0.015) {
-        this.addonLayer?.remove(runtime.group);
-        disposeGroup(runtime.group);
-        this.addons.delete(id);
-      }
-    });
-  }
-
-  private updateLabels(): void {
-    if (!this.camera || !this.host) return;
-    // Measure the full projected model, including its active indicator. A fixed
-    // pixel gap remains legible at every scale and perspective, including mobile.
-    for (const label of this.host.nativeElement.querySelectorAll<HTMLElement>('.addon-label')) {
-      const runtime = this.addons.get(label.dataset['addonId'] as AddonId);
-      if (!runtime || runtime.exiting) {
-        label.style.visibility = 'hidden';
-        continue;
-      }
-      const anchor = this.labelAnchor
-        .setFromMatrixPosition(runtime.group.matrixWorld)
-        .project(this.camera);
-      const bounds = this.labelBounds.setFromObject(runtime.group);
-      let bottom = -Infinity;
-      for (const x of [bounds.min.x, bounds.max.x])
-        for (const y of [bounds.min.y, bounds.max.y])
-          for (const z of [bounds.min.z, bounds.max.z]) {
-            const corner = this.labelCorner.set(x, y, z).project(this.camera);
-            bottom = Math.max(bottom, (1 - corner.y) * 0.5);
-          }
-      label.style.left = `${(anchor.x + 1) * 50}%`;
-      label.style.top = `calc(${bottom * 100}% + 8px)`;
-      label.style.opacity = String(runtime.opacity);
-      label.style.visibility = 'visible';
-    }
-  }
-
   private updateCamera(frame: SceneFrame): void {
     if (!this.camera || !this.world) return;
-    if (this.currentIndustry === 'gastronomia') {
-      // Long focal distance gives an isometric feel; fit the square floor at every aspect.
-      const distance = Math.max(7.1, 7.0 / this.camera.aspect);
-      this.camera.position.set(-distance * 0.57, distance * 0.65, distance * 0.75);
-      this.camera.lookAt(0, -0.48, 0.4);
-      this.world.rotation.set(0, 0, 0);
-      this.world.scale.setScalar(1);
-      if (this.stars) this.stars.visible = false;
-      return;
-    }
     if (this.stars) this.stars.visible = true;
     const preset = CAMERA_PRESETS[Math.min(5, Math.max(0, this.currentStep))];
     const distance = Math.max(

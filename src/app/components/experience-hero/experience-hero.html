@@ -11,7 +11,7 @@
   <div class="experience" [class.active]="step > 0">
     <div class="copy-panel">
       @if (step === 0) {
-      <div class="intro enter">
+      <div class="intro">
         <p class="eyebrow lime"><i class="status-dot"></i> Signature experience / online</p>
         <h1 id="hero-title">Zobacz, co możemy<br /><em>zbudować dla Twojej firmy</em></h1>
         <p class="lead">Wybierz branżę i proces, który warto usprawnić. W minutę otrzymasz koncepcję aplikacji,
@@ -101,15 +101,14 @@
     }
   </div>
 
-  <div class="visual-panel" [class.gastro-panel]="store.industryId() === 'gastronomia'"
-    [class.gastro-solutions]="store.industryId() === 'gastronomia' && step >= 2">
+  <div class="visual-panel"
+    [class.solutions-panel]="step >= 2">
     <div class="scene-meta"><span>Three.js / digital twin</span><span>0{{ step }}/05</span></div>
-    <app-business-scene [industry]="store.industryId()" [addonIds]="store.selectedAddonIds()"
-      [addonLabels]="store.addons()" [activeAddonId]="store.activeAddonId()" [step]="step" />
+    <app-business-scene [industry]="store.industryId()" [step]="step" />
     <div class="reticle reticle-a" aria-hidden="true"></div>
     <div class="reticle reticle-b" aria-hidden="true"></div>
-    @if (store.industryId() === 'gastronomia' && step >= 2) {
-    <app-cafe-tiles [selected]="store.selectedAddonIds()" (toggle)="toggleAddon($event)" />
+    @if (step >= 2) {
+    <app-selected-addons [addons]="store.selectedAddons()" [activeId]="store.activeAddonId()" />
     }
     <div class="visual-map" aria-hidden="true">
       @if (store.industry() && step === 1) { <span class="map-industry"><i>01 / rdzeń</i>{{ store.industry()?.sceneLabel

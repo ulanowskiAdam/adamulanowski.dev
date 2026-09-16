@@ -12,7 +12,7 @@ import {
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
-import type { AddonId, IndustryId } from './configurator.store';
+import type { IndustryId } from './configurator.store';
 import type { BusinessSceneRuntime } from './business-scene.runtime';
 
 @Component({
@@ -20,29 +20,15 @@ import type { BusinessSceneRuntime } from './business-scene.runtime';
   standalone: true,
   template: `<div #host class="canvas-host">
     <canvas #sceneCanvas class="scene-canvas" aria-hidden="true"></canvas>
-    @for (item of addonLabels(); track item.id) {
-      @if (industry() !== 'gastronomia' && addonIds().has(item.id)) {
-        <span
-          class="addon-label"
-          [attr.data-addon-id]="item.id"
-          [class.active]="activeAddonId() === item.id"
-          aria-hidden="true"
-          >{{ item.shortLabel }}</span
-        >
-      }
-    }
   </div>`,
   styles: [
-    ':host,.canvas-host{position:absolute;inset:0;display:block}.canvas-host canvas{display:block;width:100%;height:100%;filter:saturate(.96) contrast(1.04)}.addon-label{position:absolute;z-index:3;width:27%;transform:translateX(-50%);padding:4px 3px;border-bottom:1px solid transparent;border-radius:3px;background:#0c0e0de6;color:#f2efe5b8;text-align:center;font:600 clamp(8px, .7vw, 10px)/1.25 var(--font-mono);pointer-events:none;visibility:hidden}.addon-label.active{color:var(--lime);border-bottom-color:var(--lime)}.addon-label[data-addon-id^="gastronomia-"]{padding:4px 0;border:0;border-radius:0;background:transparent;color:#a8dde0;font-weight:400;line-height:1.4}.addon-label[data-addon-id^="gastronomia-"].active,.addon-label[data-addon-id^="gastronomia-"]:hover{color:#d3f7f8}',
+    ':host,.canvas-host{position:absolute;inset:0;display:block}.canvas-host canvas{display:block;width:100%;height:100%;filter:saturate(.96) contrast(1.04)}',
   ],
 })
 export class BusinessScene implements OnDestroy {
   @ViewChild('host') host?: ElementRef<HTMLElement>;
   @ViewChild('sceneCanvas') sceneCanvas?: ElementRef<HTMLCanvasElement>;
   readonly industry = input<IndustryId | null>(null);
-  readonly addonIds = input<ReadonlySet<AddonId>>(new Set());
-  readonly addonLabels = input<readonly { id: AddonId; shortLabel: string }[]>([]);
-  readonly activeAddonId = input<AddonId | null>(null);
   readonly step = input(0);
 
   private readonly zone = inject(NgZone);
@@ -54,10 +40,7 @@ export class BusinessScene implements OnDestroy {
     const browser = isPlatformBrowser(inject(PLATFORM_ID));
     effect(() => {
       this.industry();
-      this.addonIds();
-      this.activeAddonId();
       this.step();
-      this.addonLabels();
       this.zone.runOutsideAngular(() => this.runtime?.update());
     });
     afterNextRender(() => {
@@ -83,5 +66,9 @@ export class BusinessScene implements OnDestroy {
     this.destroyed = true;
     this.zone.runOutsideAngular(() => this.runtime?.destroy());
     this.runtime = undefined;
+  }
+
+  sync(industry: IndustryId | null, step: number): void {
+    this.zone.runOutsideAngular(() => this.runtime?.sync(industry, step));
   }
 }
