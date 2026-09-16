@@ -22,19 +22,41 @@ Configure the proxy host for `adamulanowski.dev` to forward using HTTP to
 that address refers to the proxy itself.
 
 GitHub Actions copies `docker-compose.yml` to the VPS before each deployment and
-recreates the website container as needed. The server's `.env` is preserved.
+recreates the website container as needed, using the immutable digest produced by
+that build. The server's `.env` is preserved. The workflow requires Docker Compose
+v2 with `--wait`, `--wait-timeout`, and `config --format json` support.
 For a manual deployment, copy the updated Compose file to the VPS, then run:
 
 ```bash
 cd ~/projects/adamulanowski.dev
 docker compose config --quiet
 docker compose pull
-docker compose up -d --remove-orphans --wait --wait-timeout 60
+docker compose up -d --no-deps --wait --wait-timeout 120 web
+docker exec proxy-app-1 nginx -t && docker exec proxy-app-1 nginx -s reload
 docker compose ps
 ```
 
-The wait checks that the container is running; it does not verify an HTTP response.
-Verify the public website after configuring the proxy.
+The healthcheck uses Node (already present in the image) to require HTTP 200 from
+the application. The explicit Host header matches the SSR host allowlist. No host
+port mapping is needed: NPM must use HTTP to `adamulanowski-web:4000`.
+
+Before replacing the container, the workflow checks that NPM is running and
+attached to the configured external network. After startup it tests the upstream
+from NPM's network namespace, then gracefully reloads Nginx to refresh upstream
+resolution after a possible container IP change. This checks upstream connectivity;
+verify public HTTPS separately to check the NPM proxy-host and certificate setup.
+
+On a deployment failure, the workflow prints diagnostics and attempts to restore
+the previous local image using the current Compose configuration. This is an image
+rollback, not a rollback of configuration or data. A first deployment has no image
+to restore. Images are retained for recovery. `WEB_IMAGE` can also be set to a
+specific digest for a manual deployment; otherwise Compose defaults to `latest`.
+
+This is a single-instance deployment with a brief interruption, not zero downtime.
+Compose replaces the container and reconnects its successor to `proxy_default`
+(or the configured external network); it does not preserve existing connections.
+True zero downtime requires two application instances (blue-green), readiness
+verification before switching NPM, and draining the old instance before stopping it.
 
 ## Development server
 
