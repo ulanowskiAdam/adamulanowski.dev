@@ -1,0 +1,9 @@
+services:
+  web:
+    image: ghcr.io/ulanowskiadam/adamulanowski.dev:latest
+    container_name: adamulanowski-web
+    ports:
+      - "80:80"
+    environment:
+      PORT: "80"
+    restart: always
