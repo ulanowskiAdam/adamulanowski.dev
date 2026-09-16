@@ -2,6 +2,40 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
 
+## VPS deployment behind the reverse proxy
+
+The reverse proxy owns host ports 80 and 443. The website listens on port 4000
+inside Docker and publishes no host port. Both containers must share a Docker
+network. Check the existing proxy's networks on the VPS:
+
+```bash
+docker inspect proxy-app-1 --format '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}'
+```
+
+Compose defaults to the existing `proxy_default` network. If the proxy uses a
+different network, set `PROXY_NETWORK=actual_network_name` in
+`~/projects/adamulanowski.dev/.env` on the VPS. Use a network attached to the proxy;
+creating an unrelated network will not connect the two containers.
+
+Configure the proxy host for `adamulanowski.dev` to forward using HTTP to
+`adamulanowski-web`, port `4000`. Do not use `localhost`: inside the proxy container
+that address refers to the proxy itself.
+
+GitHub Actions copies `docker-compose.yml` to the VPS before each deployment and
+recreates the website container as needed. The server's `.env` is preserved.
+For a manual deployment, copy the updated Compose file to the VPS, then run:
+
+```bash
+cd ~/projects/adamulanowski.dev
+docker compose config --quiet
+docker compose pull
+docker compose up -d --remove-orphans --wait --wait-timeout 60
+docker compose ps
+```
+
+The wait checks that the container is running; it does not verify an HTTP response.
+Verify the public website after configuring the proxy.
+
 ## Development server
 
 To start a local development server, run:

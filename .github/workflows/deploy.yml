@@ -45,6 +45,18 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy deployment configuration to VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: docker-compose.yml
+          target: projects/adamulanowski.dev
+
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -57,8 +69,8 @@ jobs:
           script: |
             set -eu
             cd "$HOME/projects/adamulanowski.dev"
+            docker compose config --quiet
             printf '%s' "$GHCR_PAT" | docker login ghcr.io --username ulanowskiadam --password-stdin
             docker compose pull
-            docker compose down --remove-orphans
-            docker compose up -d
+            docker compose up -d --remove-orphans --wait --wait-timeout 60
             docker image prune -f
