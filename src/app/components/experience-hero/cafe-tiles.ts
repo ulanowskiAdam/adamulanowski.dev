@@ -1,19 +1,19 @@
 import { isPlatformBrowser } from '@angular/common';
 import {
-  AfterViewInit,
+  afterNextRender,
   Component,
   ElementRef,
+  ErrorHandler,
   inject,
   input,
+  NgZone,
   OnDestroy,
   output,
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
-import * as THREE from 'three';
-import { AddonId } from './configurator.store';
-import { ADDON_SCENE_BUILDERS } from './addon-scenes';
-import { disposeGroup, ScenePrimitives } from './scene-primitives';
+import type { AddonId } from './configurator.store';
+import type { CafeTilesRuntime } from './cafe-tiles.runtime';
 
 @Component({
   selector: 'app-cafe-tiles',
@@ -95,7 +95,7 @@ import { disposeGroup, ScenePrimitives } from './scene-primitives';
     `,
   ],
 })
-export class CafeTiles implements AfterViewInit, OnDestroy {
+export class CafeTiles implements OnDestroy {
   @ViewChild('surface') surface?: ElementRef<HTMLElement>;
   readonly selected = input<ReadonlySet<AddonId>>(new Set());
   readonly toggle = output<AddonId>();
@@ -105,73 +105,35 @@ export class CafeTiles implements AfterViewInit, OnDestroy {
     { id: 'gastronomia-asystent-ai', label: 'Asystent AI' },
     { id: 'gastronomia-kontakt-po-wizycie', label: 'Automatyczna obsługa po wizycie' },
   ];
-  private readonly platform = inject(PLATFORM_ID);
-  private renderer?: THREE.WebGLRenderer;
-  private observer?: ResizeObserver;
-  private scenes: THREE.Scene[] = [];
-  ngAfterViewInit(): void {
-    if (!isPlatformBrowser(this.platform) || !this.surface) return;
-    const host = this.surface.nativeElement;
-    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    const canvas = this.renderer.domElement;
-    Object.assign(canvas.style, {
-      position: 'absolute',
-      inset: '0',
-      width: '100%',
-      height: '100%',
-      pointerEvents: 'none',
+  private readonly zone = inject(NgZone);
+  private readonly errors = inject(ErrorHandler);
+  private runtime?: CafeTilesRuntime;
+  private destroyed = false;
+
+  constructor() {
+    const browser = isPlatformBrowser(inject(PLATFORM_ID));
+    afterNextRender(() => {
+      if (!browser || this.destroyed) return;
+      this.zone.runOutsideAngular(() => {
+        void import('./cafe-tiles.runtime')
+          .then(({ CafeTilesRuntime }) => {
+            if (this.destroyed || !this.surface) return;
+            this.zone.runOutsideAngular(() => {
+              this.runtime = new CafeTilesRuntime(this.surface!, this.items);
+              this.runtime.init();
+            });
+          })
+          .catch((error) => {
+            this.runtime?.destroy();
+            this.errors.handleError(error);
+          });
+      });
     });
-    canvas.setAttribute('aria-hidden', 'true');
-    host.append(canvas);
-    const p = new ScenePrimitives();
-    this.scenes = this.items.map((item) => {
-      const scene = new THREE.Scene();
-      scene.add(new THREE.HemisphereLight(0xfff7e9, 0x666b61, 3));
-      const light = new THREE.DirectionalLight(0xffeed7, 3);
-      light.position.set(-3, 5, 6);
-      scene.add(light);
-      const model = ADDON_SCENE_BUILDERS[item.id](p).group;
-      model.rotation.y = -0.12;
-      scene.add(model);
-      return scene;
-    });
-    this.observer = new ResizeObserver(() => this.render());
-    this.observer.observe(host);
-    this.render();
   }
-  private render(): void {
-    if (!this.renderer || !this.surface) return;
-    const host = this.surface.nativeElement,
-      r = host.getBoundingClientRect();
-    this.renderer.setSize(r.width, r.height, false);
-    this.renderer.setScissorTest(false);
-    this.renderer.clear();
-    this.renderer.setScissorTest(true);
-    host.querySelectorAll('.miniature').forEach((el, i) => {
-      const b = el.getBoundingClientRect(),
-        aspect = b.width / b.height;
-      const h = Math.max(1.45, 1.55 / aspect);
-      const camera = new THREE.OrthographicCamera(
-        (-h * aspect) / 2,
-        (h * aspect) / 2,
-        h / 2,
-        -h / 2,
-        0.1,
-        30,
-      );
-      camera.position.set(0, 1.1, 7);
-      camera.lookAt(0, 0, 0);
-      this.renderer!.setViewport(b.left - r.left, r.bottom - b.bottom, b.width, b.height);
-      this.renderer!.setScissor(b.left - r.left, r.bottom - b.bottom, b.width, b.height);
-      this.renderer!.render(this.scenes[i], camera);
-    });
-    this.renderer.setScissorTest(false);
-  }
+
   ngOnDestroy(): void {
-    this.observer?.disconnect();
-    this.scenes.forEach((s) => disposeGroup(s));
-    this.renderer?.dispose();
+    this.destroyed = true;
+    this.zone.runOutsideAngular(() => this.runtime?.destroy());
+    this.runtime = undefined;
   }
 }

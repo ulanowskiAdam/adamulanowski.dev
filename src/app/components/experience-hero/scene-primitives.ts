@@ -118,11 +118,30 @@ export function setGroupOpacity(group: THREE.Group, opacity: number): void {
 export function disposeGroup(group: THREE.Object3D): void {
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
+  const textures = new Set<THREE.Texture>();
+  const skeletons = new Set<THREE.Skeleton>();
+  const collectTextures = (value: unknown): void => {
+    if (value instanceof THREE.Texture) textures.add(value);
+    else if (Array.isArray(value)) value.forEach(collectTextures);
+  };
   group.traverse((object) => {
-    if (!(object instanceof THREE.Mesh || object instanceof THREE.Points)) return;
+    if (object instanceof THREE.Light && 'shadow' in object) {
+      (object.shadow as THREE.LightShadow | undefined)?.dispose();
+    }
+    if (object instanceof THREE.SkinnedMesh) skeletons.add(object.skeleton);
+    if (!(object instanceof THREE.Mesh || object instanceof THREE.Points || object instanceof THREE.Line || object instanceof THREE.Sprite)) return;
     geometries.add(object.geometry);
     (Array.isArray(object.material) ? object.material : [object.material]).forEach((material) => materials.add(material));
   });
+  // Resources belong to this group. Do not share disposable assets between runtimes.
+  materials.forEach((material) => {
+    Object.values(material).forEach(collectTextures);
+    if (material instanceof THREE.ShaderMaterial) {
+      Object.values(material.uniforms).forEach((uniform) => collectTextures(uniform.value));
+    }
+  });
+  textures.forEach((texture) => texture.dispose());
+  skeletons.forEach((skeleton) => skeleton.dispose());
   geometries.forEach((geometry) => geometry.dispose());
   materials.forEach((material) => material.dispose());
 }
