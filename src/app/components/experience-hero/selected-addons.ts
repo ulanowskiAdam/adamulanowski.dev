@@ -24,12 +24,15 @@ import { AddonDefinition, AddonId } from './configurator.store';
       :host {
         display: block;
         container-type: inline-size;
+        position: relative;
+        z-index: 4;
       }
       .tiles {
         display: flex;
         justify-content: center;
         gap: 0;
         min-height: 7.5rem;
+        perspective: 40rem;
       }
       .slot {
         --tile-width: min(8rem, 25cqw);
@@ -38,6 +41,8 @@ import { AddonDefinition, AddonId } from './configurator.store';
         overflow: hidden;
       }
       .tile {
+        position: relative;
+        isolation: isolate;
         box-sizing: border-box;
         width: calc(var(--tile-width) - 0.5rem);
         min-height: 7rem;
@@ -49,20 +54,70 @@ import { AddonDefinition, AddonId } from './configurator.store';
         justify-content: center;
         gap: 0.75rem;
         text-align: center;
-        border: 1px solid #f2efe530;
-        border-radius: 0.8rem;
-        background: #171c19;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 1.15rem;
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.025) 52%),
+          rgba(12, 17, 14, 0.54);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.16),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.035),
+          0 16px 34px rgba(0, 0, 0, 0.24);
+        backdrop-filter: blur(18px) saturate(135%);
+        -webkit-backdrop-filter: blur(18px) saturate(135%);
         color: var(--paper);
         font: 600 clamp(0.6rem, 2.3cqw, 0.75rem)/1.35 var(--font-mono);
+        letter-spacing: -0.01em;
+        transition:
+          border-color 0.35s ease,
+          background 0.35s ease,
+          box-shadow 0.35s ease,
+          transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+      .tile::after {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.12), transparent 48%);
+        pointer-events: none;
       }
       .tile.active {
-        border-color: var(--lime);
-        background: #d3ff4810;
+        border-color: color-mix(in srgb, var(--lime) 58%, white 8%);
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(211, 255, 72, 0.055) 55%),
+          rgba(15, 22, 15, 0.66);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          0 0 0 1px rgba(211, 255, 72, 0.06),
+          0 18px 38px rgba(0, 0, 0, 0.3),
+          0 0 26px rgba(211, 255, 72, 0.08);
+        transform: translateY(-2px);
       }
       .icon {
-        color: var(--lime);
+        position: relative;
+        width: 2.65rem;
+        height: 2.65rem;
+        border: 1px solid rgba(255, 255, 255, 0.17);
+        border-radius: 0.88rem;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.045));
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.18),
+          0 10px 22px rgba(0, 0, 0, 0.24);
+        color: #e1ff80;
         display: grid;
         place-items: center;
+      }
+      .icon :is(svg) {
+        width: 1.28rem;
+        height: 1.28rem;
+        stroke-width: 1.65;
+        filter: drop-shadow(0 2px 6px rgba(211, 255, 72, 0.2));
+      }
+      .tile.active .icon {
+        border-color: rgba(211, 255, 72, 0.34);
+        background: linear-gradient(145deg, rgba(211, 255, 72, 0.2), rgba(255, 255, 255, 0.055));
       }
       .tile-enter {
         animation: tile-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -88,6 +143,9 @@ import { AddonDefinition, AddonId } from './configurator.store';
         .tile-enter,
         .tile-leave {
           animation-duration: 1ms;
+        }
+        .tile {
+          transition: none;
         }
       }
     `,
