@@ -104,7 +104,7 @@ describe('scene frame scheduling', () => {
     );
     // Use a renderer double: these tests exercise scheduling without requiring a GPU.
     const state = runtime as any;
-    state.renderer = { render: vi.fn(), dispose: vi.fn() };
+    state.renderer = { render: vi.fn(), setPixelRatio: vi.fn(), dispose: vi.fn() };
     state.scene = new THREE.Scene();
     state.camera = new THREE.PerspectiveCamera();
     state.world = new THREE.Group();
@@ -172,6 +172,25 @@ describe('scene frame scheduling', () => {
     state.animate(100);
     expect(state.renderer.render).toHaveBeenCalledTimes(1);
     expect(raf).toHaveBeenCalledTimes(1);
+    runtime.destroy();
+  });
+
+  it('uses motion DPR during interaction and restores sharp mobile DPR at rest', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.mobileMode = true;
+    state.motionPixelRatio = 1.1;
+    state.sharpPixelRatio = 1.5;
+    state.currentPixelRatio = 1.5;
+    state.motionUntil = 500;
+
+    state.updateDynamicPixelRatio(100);
+    expect(state.renderer.setPixelRatio).toHaveBeenLastCalledWith(1.1);
+    state.motionUntil = 100;
+    state.updateDynamicPixelRatio(200);
+    expect(state.renderer.setPixelRatio).toHaveBeenCalledTimes(1);
+    state.updateDynamicPixelRatio(300);
+    expect(state.renderer.setPixelRatio).toHaveBeenLastCalledWith(1.5);
     runtime.destroy();
   });
 

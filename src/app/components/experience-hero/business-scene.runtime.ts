@@ -35,6 +35,10 @@ export class BusinessSceneRuntime {
   private frameId = 0;
   private startedAt = 0;
   private previousFrame = 0;
+  private sharpPixelRatio = 1;
+  private motionPixelRatio = 1;
+  private currentPixelRatio = 1;
+  private motionUntil = 0;
   private currentIndustry: IndustryId | null | undefined;
   private currentStep = 0;
   private reducedMotion = false;
@@ -56,6 +60,7 @@ export class BusinessSceneRuntime {
       ((event.clientX - rect.left) / rect.width - 0.5) * 2,
       ((event.clientY - rect.top) / rect.height - 0.5) * 2,
     );
+    this.markMoving(180);
   };
 
   private readonly pointerLeave = (): void => {
@@ -83,6 +88,8 @@ export class BusinessSceneRuntime {
 
   sync(industry: IndustryId | null, step: number): void {
     if (!this.world || this.destroyed) return;
+    this.markMoving(700);
+    this.updateDynamicPixelRatio(performance.now());
     this.currentStep = step;
     if (industry !== this.currentIndustry) this.swapIndustry(industry);
     // Paint the already prepared group inside the click handler. Waiting for
@@ -134,12 +141,18 @@ export class BusinessSceneRuntime {
     this.camera.position.set(...CAMERA_PRESETS[0].position);
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.sceneCanvas!.nativeElement,
-      antialias: !this.mobileMode,
+      antialias: true,
       alpha: !this.mobileMode,
       powerPreference: 'high-performance',
     });
     this.renderer.setClearColor(0x090c0a, this.mobileMode ? 1 : 0);
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.mobileMode ? 1 : 1.75));
+    const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
+    this.sharpPixelRatio = Math.min(deviceRatio, this.mobileMode ? 1.5 : 1.75);
+    this.motionPixelRatio = this.mobileMode
+      ? Math.min(deviceRatio, 1.1)
+      : this.sharpPixelRatio;
+    this.currentPixelRatio = this.mobileMode ? this.motionPixelRatio : this.sharpPixelRatio;
+    this.renderer.setPixelRatio(this.currentPixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.08;
@@ -152,6 +165,7 @@ export class BusinessSceneRuntime {
       width: '100%',
       height: '100%',
       filter: this.mobileMode ? 'none' : 'saturate(.96) contrast(1.04)',
+      imageRendering: 'auto',
     });
 
     if (!this.mobileMode) {
@@ -181,6 +195,7 @@ export class BusinessSceneRuntime {
     this.currentStep = this.state.step();
     this.startedAt = performance.now();
     this.previousFrame = this.startedAt;
+    this.motionUntil = this.startedAt + 900;
     document.addEventListener('visibilitychange', this.visibilityChange);
     this.intersectionObserver = new IntersectionObserver(([entry]) => {
       this.visible = entry.isIntersecting;
@@ -325,6 +340,7 @@ export class BusinessSceneRuntime {
     this.previousFrame = now;
     this.updateIndustries(frame);
     this.updateCamera(frame);
+    this.updateDynamicPixelRatio(now);
     if (this.stars && !this.reducedMotion) this.stars.rotation.y -= delta * 0.018;
     this.renderer.render(this.scene, this.camera);
     if (!this.reducedMotion) this.invalidate();
@@ -427,6 +443,21 @@ export class BusinessSceneRuntime {
     this.world.scale.setScalar(scale);
   }
 
+  private markMoving(durationMs: number): void {
+    this.motionUntil = Math.max(this.motionUntil, performance.now() + durationMs);
+  }
+
+  private updateDynamicPixelRatio(now: number): void {
+    if (!this.mobileMode || !this.renderer) return;
+    const target = now < this.motionUntil ? this.motionPixelRatio : this.sharpPixelRatio;
+    if (Math.abs(target - this.currentPixelRatio) < 0.01) return;
+    // Lower immediately during interaction. Restore sharpness only after a short
+    // stable period so the drawing buffer is never reallocated on every frame.
+    if (target > this.currentPixelRatio && now - this.motionUntil < 180) return;
+    this.currentPixelRatio = target;
+    this.renderer.setPixelRatio(target);
+  }
+
   private resize(): void {
     const host = this.host?.nativeElement;
     if (!host || !this.renderer || !this.camera) return;
@@ -434,9 +465,13 @@ export class BusinessSceneRuntime {
     const height = Math.max(1, host.clientHeight);
     this.narrowPanel = width / height < 0.9;
     this.renderer.setSize(width, height, false);
-    this.renderer.setPixelRatio(
-      Math.min(devicePixelRatio, this.mobileMode ? 1 : this.narrowPanel ? 1.5 : 1.75),
-    );
+    if (!this.mobileMode) {
+      const target = Math.min(devicePixelRatio, this.narrowPanel ? 1.5 : 1.75);
+      if (Math.abs(target - this.currentPixelRatio) >= 0.01) {
+        this.currentPixelRatio = target;
+        this.renderer.setPixelRatio(target);
+      }
+    }
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.invalidate();
