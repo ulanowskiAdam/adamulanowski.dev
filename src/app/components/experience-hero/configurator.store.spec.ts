@@ -142,9 +142,16 @@ describe('hero configurator', () => {
     expect(mailto).toContain('Imię: Jan');
     expect(mailto).toContain('Kontakt: jan@example.com');
     expect(mailto).toContain('Miasto: Gdańsk');
-    expect(mailto).toContain('Branża: Fachowcy i usługi');
+    expect(mailto).toContain('branży: Fachowcy i usługi');
     expect(mailto).toContain('Inteligentny formularz zapytania');
     expect(mailto).toContain('Automatyzacja obsługi zleceń');
+    expect(hero.mailtoLink).toContain('subject=Koncepcja%3A%20Fachowcy%20i%20us%C5%82ugi');
+    expect(hero.mailtoLink).toContain('%0D%0A');
+    expect(hero.mailtoLink).not.toMatch(/\s/);
+    expect(hero.gmailLink).toContain('https://mail.google.com/mail/?view=cm&fs=1');
+    expect(hero.gmailLink).toContain('to=aulanowski98%40gmail.com');
+    expect(hero.gmailLink).toContain('su=Koncepcja%3A%20Fachowcy%20i%20us%C5%82ugi');
+    expect(hero.gmailLink).not.toMatch(/\s/);
 
     hero.restart();
     expect(hero.store.step()).toBe(0);

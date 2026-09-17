@@ -61,6 +61,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 
 @media(max-width:560px){.scene-caption{left:.75rem;right:.75rem;font-size:.48rem}.scene-meta{left:.75rem;right:.75rem;font-size:.5rem}}.visual-map .map-industry{top:auto;bottom:0;left:0}
 
+.contact-actions{display:grid;gap:.8rem;max-width:24rem}
+.gmail-button{color:#f2efe599;font:.65rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.gmail-button:hover{color:var(--lime)}
+
 
 .solutions-panel{--lime:#ccff00;display:flex;flex-direction:column;padding:3rem 1.25rem;min-height:37rem}
 .solutions-panel app-business-scene{position:relative;inset:auto;display:block;flex:1;min-height:25rem}

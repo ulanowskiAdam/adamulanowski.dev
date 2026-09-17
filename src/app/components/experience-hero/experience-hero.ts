@@ -21,18 +21,13 @@ export class ExperienceHero {
   city = '';
 
   get mailtoLink(): string {
-    const subject = encodeURIComponent(
-      `Koncepcja cyfrowego usprawnienia — ${this.store.industry()?.label ?? 'moja firma'}`,
-    );
-    const solutions =
-      this.store
-        .selectedAddons()
-        .map((item) => `- ${item.label}`)
-        .join('\n') || '- do ustalenia';
-    const body = encodeURIComponent(
-      `Cześć Adam,\n\nchcę porozmawiać o przygotowanej koncepcji cyfrowego usprawnienia.\n\nImię: ${this.name.trim()}\nKontakt: ${this.contact.trim()}\nMiasto: ${this.city.trim()}\nBranża: ${this.store.industry()?.label ?? 'do ustalenia'}\n\nWybrane rozwiązania:\n${solutions}}`,
-    );
+    const { subject, body } = this.emailDraft();
     return `mailto:aulanowski98@gmail.com?subject=${subject}&body=${body}`;
+  }
+
+  get gmailLink(): string {
+    const { subject, body } = this.emailDraft();
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=aulanowski98%40gmail.com&su=${subject}&body=${body}`;
   }
 
   start(): void {
@@ -70,5 +65,22 @@ export class ExperienceHero {
 
   private syncScene(): void {
     this.businessScene?.sync(this.store.industryId(), this.store.step());
+  }
+
+  private emailBody(industry: string, solutions: string): string {
+    return `Cześć Adam,\n\nChcę porozmawiać o usprawnieniu dla branży: ${industry}.\n\nWybrane rozwiązania:\n${solutions}\n\nImię: ${this.name.trim()}\nKontakt: ${this.contact.trim()}\nMiasto: ${this.city.trim()}\n\nPozdrawiam!`;
+  }
+
+  private emailDraft(): { subject: string; body: string } {
+    const industry = this.store.industry()?.label ?? 'moja firma';
+    const solutions =
+      this.store
+        .selectedAddons()
+        .map((item) => `- ${item.label}`)
+        .join('\n') || '- do ustalenia';
+    return {
+      subject: encodeURIComponent(`Koncepcja: ${industry}`),
+      body: encodeURIComponent(this.emailBody(industry, solutions).replace(/\r?\n/g, '\r\n')),
+    };
   }
 }

@@ -95,7 +95,10 @@
       </dl>
       <p class="result-lead">Wybrane elementy możemy połączyć w jedną aplikację dopasowaną do sposobu działania Twojej
         firmy.</p>
-      <a class="primary-button" [href]="mailtoLink">Otwórz gotową wiadomość <span>↗</span></a>
+      <div class="contact-actions">
+        <a class="primary-button" [href]="mailtoLink">Otwórz w programie pocztowym <span>↗</span></a>
+        <a class="gmail-button" [href]="gmailLink" target="_blank" rel="noopener">Otwórz w Gmailu <span>↗</span></a>
+      </div>
       <button class="restart-button" type="button" (click)="restart()">Zacznij od nowa</button>
     </div>
     }
