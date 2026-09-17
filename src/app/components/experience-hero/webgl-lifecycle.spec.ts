@@ -104,7 +104,12 @@ describe('scene frame scheduling', () => {
     );
     // Use a renderer double: these tests exercise scheduling without requiring a GPU.
     const state = runtime as any;
-    state.renderer = { render: vi.fn(), setPixelRatio: vi.fn(), dispose: vi.fn() };
+    state.renderer = {
+      render: vi.fn(),
+      setPixelRatio: vi.fn(),
+      setSize: vi.fn(),
+      dispose: vi.fn(),
+    };
     state.scene = new THREE.Scene();
     state.camera = new THREE.PerspectiveCamera();
     state.world = new THREE.Group();
@@ -191,6 +196,30 @@ describe('scene frame scheduling', () => {
     expect(state.renderer.setPixelRatio).toHaveBeenCalledTimes(1);
     state.updateDynamicPixelRatio(300);
     expect(state.renderer.setPixelRatio).toHaveBeenLastCalledWith(1.5);
+    runtime.destroy();
+  });
+
+  it('ignores a mobile address-bar height resize but accepts a width change', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.mobileMode = true;
+    state.renderedWidth = 390;
+    state.renderedHeight = 320;
+    state.viewportHeight = window.innerHeight - 50;
+    Object.defineProperties(state.host.nativeElement, {
+      clientWidth: { configurable: true, value: 390 },
+      clientHeight: { configurable: true, value: 360 },
+    });
+
+    state.resize();
+    expect(state.renderer.setSize).not.toHaveBeenCalled();
+
+    Object.defineProperty(state.host.nativeElement, 'clientWidth', {
+      configurable: true,
+      value: 844,
+    });
+    state.resize();
+    expect(state.renderer.setSize).toHaveBeenCalledWith(844, 360, false);
     runtime.destroy();
   });
 

@@ -39,6 +39,9 @@ export class BusinessSceneRuntime {
   private motionPixelRatio = 1;
   private currentPixelRatio = 1;
   private motionUntil = 0;
+  private renderedWidth = 0;
+  private renderedHeight = 0;
+  private viewportHeight = 0;
   private currentIndustry: IndustryId | null | undefined;
   private currentStep = 0;
   private reducedMotion = false;
@@ -142,10 +145,11 @@ export class BusinessSceneRuntime {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.sceneCanvas!.nativeElement,
       antialias: true,
-      alpha: !this.mobileMode,
+      alpha: true,
+      precision: 'highp',
       powerPreference: 'high-performance',
     });
-    this.renderer.setClearColor(0x090c0a, this.mobileMode ? 1 : 0);
+    this.renderer.setClearColor(0x000000, 0);
     const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
     this.sharpPixelRatio = Math.min(deviceRatio, this.mobileMode ? 1.5 : 1.75);
     this.motionPixelRatio = this.mobileMode
@@ -155,7 +159,7 @@ export class BusinessSceneRuntime {
     this.renderer.setPixelRatio(this.currentPixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.toneMappingExposure = this.mobileMode ? 1.32 : 1.08;
     this.renderer.shadowMap.enabled = !this.mobileMode;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     // Angular owns the canvas node, preserving it across hydration and option changes.
@@ -255,6 +259,15 @@ export class BusinessSceneRuntime {
     material.userData['baseOpacity'] = material.opacity;
     this.stars = new THREE.Points(geometry, material);
     this.scene.add(this.stars);
+    if (this.mobileMode) {
+      // Mobile fallback: predictable, cheap lighting without an HDR cubemap.
+      this.scene.add(new THREE.AmbientLight(0xf2f5f1, 1.65));
+      const sun = new THREE.DirectionalLight(0xf4ffe0, 3.2);
+      sun.position.set(3.5, 5.5, 4.5);
+      sun.castShadow = false;
+      this.scene.add(sun);
+      return;
+    }
     this.scene.add(new THREE.HemisphereLight(0xe6f1ea, 0x111512, 2));
     this.keyLight = new THREE.PointLight(0xcfff47, 24, 12);
     this.keyLight.position.set(3.4, 4.2, 4);
@@ -463,6 +476,20 @@ export class BusinessSceneRuntime {
     if (!host || !this.renderer || !this.camera) return;
     const width = Math.max(1, host.clientWidth);
     const height = Math.max(1, host.clientHeight);
+    const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+    const widthChanged = Math.abs(width - this.renderedWidth) > 1;
+    const heightChanged = Math.abs(height - this.renderedHeight) > 1;
+    const browserChromeChanged = Math.abs(viewportHeight - this.viewportHeight) > 1;
+    const heightOnlyBrowserResize =
+      this.mobileMode &&
+      this.renderedWidth > 0 &&
+      !widthChanged &&
+      heightChanged &&
+      browserChromeChanged;
+    this.viewportHeight = viewportHeight;
+    if (heightOnlyBrowserResize || (!widthChanged && !heightChanged)) return;
+    this.renderedWidth = width;
+    this.renderedHeight = height;
     this.narrowPanel = width / height < 0.9;
     this.renderer.setSize(width, height, false);
     if (!this.mobileMode) {
