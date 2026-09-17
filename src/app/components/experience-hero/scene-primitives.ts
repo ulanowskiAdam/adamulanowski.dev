@@ -1,30 +1,61 @@
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ScenePrimitivesContract, SceneRole } from './scene-types';
 
 export class ScenePrimitives implements ScenePrimitivesContract {
-  material(color: number, roughness = 0.5, metalness = 0): THREE.MeshPhysicalMaterial {
-    const material = new THREE.MeshPhysicalMaterial({ color, roughness, metalness, clearcoat: metalness > 0.3 ? 0.16 : 0 });
+  constructor(private readonly lowPower = false) {}
+
+  material(color: number, roughness = 0.5, metalness = 0): THREE.MeshStandardMaterial {
+    const material = this.lowPower
+      ? new THREE.MeshStandardMaterial({ color, roughness, metalness: Math.min(metalness, 0.25) })
+      : new THREE.MeshPhysicalMaterial({
+          color,
+          roughness,
+          metalness,
+          clearcoat: metalness > 0.3 ? 0.16 : 0,
+        });
     this.rememberOpacity(material);
     return material;
   }
 
-  roleMaterial(role: SceneRole, transparent = false): THREE.MeshPhysicalMaterial {
+  roleMaterial(role: SceneRole, transparent = false): THREE.MeshStandardMaterial {
     const colors: Record<SceneRole, number> = { primary: 0x435149, accent: 0xcfff47, dark: 0x111613, light: 0xe8eee9 };
-    const material = new THREE.MeshPhysicalMaterial({
+    const options = {
       color: colors[role],
       roughness: role === 'dark' ? 0.56 : 0.3,
       metalness: role === 'accent' ? 0.34 : 0.12,
-      clearcoat: role === 'accent' ? 0.38 : 0.08,
       transparent,
       opacity: transparent ? 0.84 : 1,
-    });
+    };
+    const material = this.lowPower
+      ? new THREE.MeshStandardMaterial(options)
+      : new THREE.MeshPhysicalMaterial({
+          ...options,
+          clearcoat: role === 'accent' ? 0.38 : 0.08,
+        });
     material.userData['role'] = role;
     this.rememberOpacity(material);
     return material;
   }
 
-  glass(): THREE.MeshPhysicalMaterial {
-    const material = new THREE.MeshPhysicalMaterial({ color: 0x82d6c0, transparent: true, opacity: 0.24, transmission: 0.74, roughness: 0.08, metalness: 0.06, thickness: 0.18 });
+  glass(): THREE.MeshStandardMaterial {
+    const material = this.lowPower
+      ? new THREE.MeshStandardMaterial({
+          color: 0x82d6c0,
+          transparent: true,
+          opacity: 0.2,
+          roughness: 0.28,
+          metalness: 0.04,
+        })
+      : new THREE.MeshPhysicalMaterial({
+          color: 0x82d6c0,
+          transparent: true,
+          opacity: 0.24,
+          transmission: 0.74,
+          roughness: 0.08,
+          metalness: 0.06,
+          thickness: 0.18,
+        });
     this.rememberOpacity(material);
     material.depthWrite = false;
     return material;
@@ -99,6 +130,41 @@ export class ScenePrimitives implements ScenePrimitivesContract {
     material.userData['baseOpacity'] = material.opacity;
     material.userData['baseDepthWrite'] = material.depthWrite;
   }
+}
+
+/** Collapses static meshes sharing a material into a single mobile draw call. */
+export function batchStaticMeshes(group: THREE.Group): void {
+  group.updateMatrixWorld(true);
+  const inverseRoot = group.matrixWorld.clone().invert();
+  const buckets = new Map<string, THREE.Mesh[]>();
+  group.traverse((object) => {
+    if (!(object instanceof THREE.Mesh) || object instanceof THREE.SkinnedMesh) return;
+    if (object.userData['dynamic'] || Array.isArray(object.material) || object.material.transparent)
+      return;
+    const attributes = Object.keys(object.geometry.attributes).sort().join(',');
+    const key = `${object.material.uuid}|${object.geometry.index ? 'i' : 'n'}|${attributes}`;
+    const bucket = buckets.get(key) ?? [];
+    bucket.push(object);
+    buckets.set(key, bucket);
+  });
+
+  buckets.forEach((meshes) => {
+    if (meshes.length < 2) return;
+    const geometries = meshes.map((mesh) => {
+      const geometry = mesh.geometry.clone();
+      geometry.applyMatrix4(inverseRoot.clone().multiply(mesh.matrixWorld));
+      return geometry;
+    });
+    const merged = mergeGeometries(geometries, false);
+    geometries.forEach((geometry) => geometry.dispose());
+    if (!merged) return;
+    const batch = new THREE.Mesh(merged, meshes[0].material);
+    group.add(batch);
+    meshes.forEach((mesh) => {
+      mesh.removeFromParent();
+      mesh.geometry.dispose();
+    });
+  });
 }
 
 export function setGroupOpacity(group: THREE.Group, opacity: number): void {

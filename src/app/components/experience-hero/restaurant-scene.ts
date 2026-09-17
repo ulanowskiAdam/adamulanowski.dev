@@ -130,7 +130,9 @@ export function buildRestaurant(p: ScenePrimitivesContract): BuiltScene {
   const steam = Array.from({ length: 4 }, (_, i) => {
     const material = p.material(0xeee4d3, 1); material.transparent = true; material.opacity = 0.34; material.depthWrite = false;
     material.userData['baseOpacity'] = 0.34; material.userData['baseDepthWrite'] = false;
-    return p.add(counter, new THREE.SphereGeometry(0.025 + i * 0.004, 12, 8), material, [0.69, 0.05 + i * 0.075, -0.05], false);
+    const node = p.add(counter, new THREE.SphereGeometry(0.025 + i * 0.004, 12, 8), material, [0.69, 0.05 + i * 0.075, -0.05], false);
+    node.userData['dynamic'] = true;
+    return node;
   });
   return { group, animate: ({ time, reducedMotion }) => {
     steam.forEach((node, i) => {

@@ -16,7 +16,7 @@ function setup(p: ScenePrimitivesContract) {
   [accent, dark, light].forEach((m) => {
     m.roughness = 0.65;
     m.metalness = 0;
-    m.clearcoat = 0;
+    if (m instanceof THREE.MeshPhysicalMaterial) m.clearcoat = 0;
     m.envMapIntensity = 0.2;
   });
   accent.emissiveIntensity = 0.08;

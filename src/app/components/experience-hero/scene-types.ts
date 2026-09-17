@@ -18,9 +18,9 @@ export type IndustrySceneBuilder = (primitives: ScenePrimitivesContract) => Buil
 export type AddonSceneBuilder = (primitives: ScenePrimitivesContract) => BuiltScene;
 
 export interface ScenePrimitivesContract {
-  material(color: number, roughness?: number, metalness?: number): THREE.MeshPhysicalMaterial;
-  roleMaterial(role: SceneRole, transparent?: boolean): THREE.MeshPhysicalMaterial;
-  glass(): THREE.MeshPhysicalMaterial;
+  material(color: number, roughness?: number, metalness?: number): THREE.MeshStandardMaterial;
+  roleMaterial(role: SceneRole, transparent?: boolean): THREE.MeshStandardMaterial;
+  glass(): THREE.MeshStandardMaterial;
   add(group: THREE.Group, geometry: THREE.BufferGeometry, material: THREE.Material, position: THREE.Vector3Tuple, shadows?: boolean): THREE.Mesh;
   box(group: THREE.Group, size: THREE.Vector3Tuple, position: THREE.Vector3Tuple, material: THREE.Material, shadows?: boolean): THREE.Mesh;
   cylinder(group: THREE.Group, radius: number, height: number, position: THREE.Vector3Tuple, material: THREE.Material, segments?: number, shadows?: boolean): THREE.Mesh;

@@ -7,7 +7,7 @@ import {
   damp,
   INDUSTRY_ROTATIONS,
 } from './scene-layout';
-import { disposeGroup, ScenePrimitives, setGroupOpacity } from './scene-primitives';
+import { batchStaticMeshes, disposeGroup, ScenePrimitives, setGroupOpacity } from './scene-primitives';
 import { IndustryRuntime, SceneFrame } from './scene-types';
 
 interface TransitioningIndustry extends IndustryRuntime {
@@ -17,7 +17,7 @@ interface TransitioningIndustry extends IndustryRuntime {
 }
 
 export class BusinessSceneRuntime {
-  private readonly primitives = new ScenePrimitives();
+  private primitives = new ScenePrimitives();
   private renderer?: THREE.WebGLRenderer;
   private camera?: THREE.PerspectiveCamera;
   private scene?: THREE.Scene;
@@ -35,7 +35,6 @@ export class BusinessSceneRuntime {
   private frameId = 0;
   private startedAt = 0;
   private previousFrame = 0;
-  private lastMobileFrame = 0;
   private currentIndustry: IndustryId | null | undefined;
   private currentStep = 0;
   private reducedMotion = false;
@@ -121,6 +120,7 @@ export class BusinessSceneRuntime {
     const host = this.host?.nativeElement;
     if (!host) return;
     this.mobileMode = matchMedia('(max-width: 600px), (pointer: coarse)').matches;
+    this.primitives = new ScenePrimitives(this.mobileMode);
     this.motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
     this.reducedMotion = this.motionQuery.matches;
     this.motionQuery.addEventListener('change', this.motionChange);
@@ -135,10 +135,10 @@ export class BusinessSceneRuntime {
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.sceneCanvas!.nativeElement,
       antialias: !this.mobileMode,
-      alpha: true,
+      alpha: !this.mobileMode,
       powerPreference: 'high-performance',
     });
-    this.renderer.setClearColor(0x090c0a, 0);
+    this.renderer.setClearColor(0x090c0a, this.mobileMode ? 1 : 0);
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.mobileMode ? 1 : 1.75));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -151,7 +151,7 @@ export class BusinessSceneRuntime {
       display: 'block',
       width: '100%',
       height: '100%',
-      filter: 'saturate(.96) contrast(1.04)',
+      filter: this.mobileMode ? 'none' : 'saturate(.96) contrast(1.04)',
     });
 
     if (!this.mobileMode) {
@@ -285,6 +285,14 @@ export class BusinessSceneRuntime {
     const built = id
       ? INDUSTRY_SCENE_BUILDERS[id](this.primitives)
       : buildCoreScene(this.primitives);
+    if (this.mobileMode) {
+      const lights: THREE.Light[] = [];
+      built.group.traverse((object) => {
+        if (object instanceof THREE.Light) lights.push(object);
+      });
+      lights.forEach((light) => light.removeFromParent());
+      batchStaticMeshes(built.group);
+    }
     const mockup: IndustryRuntime = { ...built, id };
     this.mockups.set(id, mockup);
     return mockup;
@@ -294,7 +302,6 @@ export class BusinessSceneRuntime {
     cancelAnimationFrame(this.frameId);
     this.frameId = 0;
     this.previousFrame = performance.now();
-    this.lastMobileFrame = 0;
     this.invalidate();
   };
 
@@ -309,18 +316,6 @@ export class BusinessSceneRuntime {
     this.frameId = 0;
     if (this.destroyed || !this.visible || document.hidden) return;
     if (!this.renderer || !this.scene || !this.camera || !this.world) return;
-    // Keep the scene alive on phones, but cap expensive WebGL work at 30 FPS.
-    // A mobile device is not the same thing as a reduced-motion preference.
-    if (
-      this.mobileMode &&
-      !this.reducedMotion &&
-      this.lastMobileFrame > 0 &&
-      now - this.lastMobileFrame < 1000 / 30
-    ) {
-      this.invalidate();
-      return;
-    }
-    if (this.mobileMode) this.lastMobileFrame = now;
     const delta = Math.min((now - this.previousFrame) / 1000, 0.05);
     const frame: SceneFrame = {
       time: (now - this.startedAt) / 1000,

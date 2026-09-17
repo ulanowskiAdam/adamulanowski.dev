@@ -6,9 +6,38 @@ import { BusinessScene } from './business-scene';
 import { CafeTiles } from './cafe-tiles';
 import { CafeTilesRuntime } from './cafe-tiles.runtime';
 import { BusinessSceneRuntime } from './business-scene.runtime';
-import { disposeGroup } from './scene-primitives';
+import { batchStaticMeshes, disposeGroup, ScenePrimitives } from './scene-primitives';
 
 describe('WebGL resource ownership', () => {
+  it('batches static mobile meshes while preserving animated nodes', () => {
+    const group = new THREE.Group();
+    const material = new THREE.MeshStandardMaterial();
+    group.add(
+      new THREE.Mesh(new THREE.BoxGeometry(), material),
+      new THREE.Mesh(new THREE.BoxGeometry(), material),
+    );
+    const animated = new THREE.Mesh(new THREE.SphereGeometry(), material);
+    animated.userData['dynamic'] = true;
+    group.add(animated);
+
+    batchStaticMeshes(group);
+
+    const meshes: THREE.Mesh[] = [];
+    group.traverse((object) => {
+      if (object instanceof THREE.Mesh) meshes.push(object);
+    });
+    expect(meshes).toHaveLength(2);
+    expect(animated.parent).toBe(group);
+    disposeGroup(group);
+  });
+
+  it('uses the cheaper standard material in the mobile scene profile', () => {
+    const material = new ScenePrimitives(true).material(0xffffff);
+    expect(material).toBeInstanceOf(THREE.MeshStandardMaterial);
+    expect(material).not.toBeInstanceOf(THREE.MeshPhysicalMaterial);
+    material.dispose();
+  });
+
   it('disposes shared geometry, materials, textures and shadow targets once', () => {
     const group = new THREE.Group();
     const geometry = new THREE.BoxGeometry();
@@ -143,21 +172,6 @@ describe('scene frame scheduling', () => {
     state.animate(100);
     expect(state.renderer.render).toHaveBeenCalledTimes(1);
     expect(raf).toHaveBeenCalledTimes(1);
-    runtime.destroy();
-  });
-
-  it('keeps mobile animation running while limiting WebGL rendering to 30 FPS', () => {
-    const raf = vi.fn().mockReturnValue(1);
-    vi.stubGlobal('requestAnimationFrame', raf);
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
-    const { runtime, state } = scene();
-    state.mobileMode = true;
-    state.reducedMotion = false;
-    state.animate(100);
-    state.animate(110);
-    state.animate(134);
-    expect(state.renderer.render).toHaveBeenCalledTimes(2);
-    expect(raf).toHaveBeenCalledTimes(3);
     runtime.destroy();
   });
 
