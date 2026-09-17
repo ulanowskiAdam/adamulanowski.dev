@@ -146,6 +146,21 @@ describe('scene frame scheduling', () => {
     runtime.destroy();
   });
 
+  it('keeps mobile animation running while limiting WebGL rendering to 30 FPS', () => {
+    const raf = vi.fn().mockReturnValue(1);
+    vi.stubGlobal('requestAnimationFrame', raf);
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.mobileMode = true;
+    state.reducedMotion = false;
+    state.animate(100);
+    state.animate(110);
+    state.animate(134);
+    expect(state.renderer.render).toHaveBeenCalledTimes(2);
+    expect(raf).toHaveBeenCalledTimes(3);
+    runtime.destroy();
+  });
+
   it('cancels queued frames and never schedules after destruction', () => {
     const raf = vi.fn().mockReturnValue(42);
     const cancel = vi.fn();

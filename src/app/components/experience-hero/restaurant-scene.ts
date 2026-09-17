@@ -137,8 +137,9 @@ export function buildRestaurant(p: ScenePrimitivesContract): BuiltScene {
       const phase = reducedMotion ? (i + 0.5) / 4 : (time * 0.22 + i / 4) % 1;
       node.position.set(0.69 + Math.sin(phase * 5 + i) * 0.035, 0.02 + phase * 0.38, -0.05);
       node.scale.setScalar(0.55 + phase * 0.8);
-      // setGroupOpacity restores the base each frame; fade only this billow.
-      (node.material as THREE.Material).opacity *= reducedMotion ? 1 : Math.sin(Math.PI * phase);
+      const material = node.material as THREE.Material;
+      const baseOpacity = material.userData['baseOpacity'] as number;
+      material.opacity = baseOpacity * (reducedMotion ? 1 : Math.sin(Math.PI * phase));
     });
   } };
 }

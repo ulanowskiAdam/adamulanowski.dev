@@ -148,6 +148,37 @@ import { AddonDefinition, AddonId } from './configurator.store';
           transition: none;
         }
       }
+      @media (max-width: 560px) {
+        .tiles {
+          min-height: 4.25rem;
+          align-items: center;
+          gap: 0.35rem;
+        }
+        .slot {
+          --tile-width: 3.7rem;
+          overflow: visible;
+        }
+        .tile {
+          width: 3.7rem;
+          min-height: 3.7rem;
+          margin: 0;
+          padding: 0.35rem;
+          border-radius: 1rem;
+        }
+        .tile > span:last-child {
+          display: none;
+        }
+        .icon {
+          width: 2.65rem;
+          height: 2.65rem;
+          border: 0;
+          background: transparent;
+          box-shadow: none;
+        }
+        .tile.active {
+          transform: translateY(-0.2rem);
+        }
+      }
     `,
   ],
 })

@@ -35,6 +35,7 @@ export class BusinessSceneRuntime {
   private frameId = 0;
   private startedAt = 0;
   private previousFrame = 0;
+  private lastMobileFrame = 0;
   private currentIndustry: IndustryId | null | undefined;
   private currentStep = 0;
   private reducedMotion = false;
@@ -62,7 +63,7 @@ export class BusinessSceneRuntime {
     this.pointerTarget.set(0, 0);
   };
   private readonly motionChange = (event: MediaQueryListEvent): void => {
-    this.reducedMotion = event.matches || this.mobileMode;
+    this.reducedMotion = event.matches;
     if (this.reducedMotion) this.pointerTarget.set(0, 0);
     this.invalidate();
   };
@@ -121,7 +122,7 @@ export class BusinessSceneRuntime {
     if (!host) return;
     this.mobileMode = matchMedia('(max-width: 600px), (pointer: coarse)').matches;
     this.motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
-    this.reducedMotion = this.motionQuery.matches || this.mobileMode;
+    this.reducedMotion = this.motionQuery.matches;
     this.motionQuery.addEventListener('change', this.motionChange);
     this.pointerEnabled = matchMedia('(pointer: fine)').matches;
     host.addEventListener('pointermove', this.pointerMove);
@@ -293,6 +294,7 @@ export class BusinessSceneRuntime {
     cancelAnimationFrame(this.frameId);
     this.frameId = 0;
     this.previousFrame = performance.now();
+    this.lastMobileFrame = 0;
     this.invalidate();
   };
 
@@ -307,6 +309,18 @@ export class BusinessSceneRuntime {
     this.frameId = 0;
     if (this.destroyed || !this.visible || document.hidden) return;
     if (!this.renderer || !this.scene || !this.camera || !this.world) return;
+    // Keep the scene alive on phones, but cap expensive WebGL work at 30 FPS.
+    // A mobile device is not the same thing as a reduced-motion preference.
+    if (
+      this.mobileMode &&
+      !this.reducedMotion &&
+      this.lastMobileFrame > 0 &&
+      now - this.lastMobileFrame < 1000 / 30
+    ) {
+      this.invalidate();
+      return;
+    }
+    if (this.mobileMode) this.lastMobileFrame = now;
     const delta = Math.min((now - this.previousFrame) / 1000, 0.05);
     const frame: SceneFrame = {
       time: (now - this.startedAt) / 1000,
@@ -342,9 +356,7 @@ export class BusinessSceneRuntime {
       runtime.group.position.z = this.reducedMotion
         ? targetZ
         : damp(runtime.group.position.z, targetZ, 7, frame.delta);
-      // Some model animators multiply material opacity, so restore their base each frame.
-      if (runtime.animate || runtime.opacity !== previousOpacity)
-        setGroupOpacity(runtime.group, runtime.opacity);
+      if (runtime.opacity !== previousOpacity) setGroupOpacity(runtime.group, runtime.opacity);
       if (!runtime.exiting) runtime.animate?.(frame);
       if (runtime.exiting && runtime.opacity < 0.015) {
         this.world?.remove(runtime.group);
