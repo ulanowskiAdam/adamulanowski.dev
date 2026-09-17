@@ -1,5 +1,5 @@
 @let step = store.step();
-<section class="hero" aria-labelledby="hero-title">
+<section id="configurator" class="hero" [class.configuring]="step > 0" aria-labelledby="hero-title">
   <div class="hero-grid" aria-hidden="true"></div>
   <div class="hero-glow glow-a" aria-hidden="true"></div>
   <div class="hero-glow glow-b" aria-hidden="true"></div>
@@ -60,14 +60,18 @@
           <div class="form-title"><small>Ostatni krok</small>
             <h2>Dopasujmy koncepcję do Twojej firmy</h2>
           </div>
-          <label>Jak masz na imię?<input name="name" [(ngModel)]="name" autocomplete="name" required
+          <label>Jak masz na imię?<input name="name" [(ngModel)]="name" autocomplete="name" maxlength="100" required
               placeholder="Adam" /></label>
-          <label>Telefon lub e-mail<input name="contact" [(ngModel)]="contact" required
+          <label>Telefon lub e-mail<input name="contact" [(ngModel)]="contact" maxlength="200" required
               placeholder="Twój kontakt" /></label>
-          <label>W jakim mieście działasz?<input name="city" [(ngModel)]="city" autocomplete="address-level2" required
+          <label>W jakim mieście działasz?<input name="city" [(ngModel)]="city" autocomplete="address-level2" maxlength="100" required
               placeholder="Warszawa" /></label>
+          <label class="message-field">Chcesz coś dodać?<textarea name="message" [(ngModel)]="message" maxlength="2000" rows="3"
+              placeholder="Krótko opisz, czego potrzebujesz (opcjonalnie)"></textarea></label>
+          <label class="bot-field" aria-hidden="true">Strona internetowa<input name="website" [(ngModel)]="website"
+              autocomplete="off" tabindex="-1" /></label>
           <button class="result-button" type="submit">Pokaż moją koncepcję <span>↗</span></button>
-          <p class="privacy-note">Dane pozostają w formularzu. Kontakt inicjujesz samodzielnie w następnym kroku.</p>
+          <p class="privacy-note">W następnym kroku sprawdzisz podsumowanie przed wysłaniem wiadomości.</p>
         </form>
         }
         <div class="step-actions">
@@ -92,13 +96,36 @@
           <dd><span class="result-tags">@for (item of store.selectedAddons(); track item.id) { <span>{{ item.label
                 }}</span> }</span></dd>
         </div>
+        <div>
+          <dt>Kontakt</dt>
+          <dd>{{ name }} · {{ contact }} · {{ city }}</dd>
+        </div>
+        @if (message) {
+        <div>
+          <dt>Wiadomość</dt>
+          <dd>{{ message }}</dd>
+        </div>
+        }
       </dl>
       <p class="result-lead">Wybrane elementy możemy połączyć w jedną aplikację dopasowaną do sposobu działania Twojej
         firmy.</p>
       <div class="contact-actions">
-        <a class="primary-button" [href]="mailtoLink">Otwórz w programie pocztowym <span>↗</span></a>
-        <a class="gmail-button" [href]="gmailLink" target="_blank" rel="noopener">Otwórz w Gmailu <span>↗</span></a>
+        <button class="primary-button send-button" type="button" (click)="sendMessage()"
+          [disabled]="sendState() === 'sending' || sendState() === 'sent'">
+          @if (sendState() === 'sending') { Wysyłanie… }
+          @else if (sendState() === 'sent') { Wiadomość wysłana ✓ }
+          @else { Wyślij wiadomość <span>↗</span> }
+        </button>
+        @if (sendState() === 'sent') {
+        <p class="send-feedback success" role="status">Dziękuję! Wiadomość dotarła — odezwę się najszybciej, jak to możliwe.</p>
+        } @else if (sendState() === 'error') {
+        <p class="send-feedback error" role="alert">{{ sendError() }}</p>
+        }
+        <p class="privacy-note">Klikając „Wyślij wiadomość”, przekazujesz dane wyłącznie w celu odpowiedzi na zapytanie.</p>
       </div>
+      @if (sendState() !== 'sent') {
+      <button class="restart-button" type="button" (click)="editDetails()" [disabled]="sendState() === 'sending'">← Edytuj dane</button>
+      }
       <button class="restart-button" type="button" (click)="restart()">Zacznij od nowa</button>
     </div>
     }

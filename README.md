@@ -17,6 +17,33 @@ different network, set `PROXY_NETWORK=actual_network_name` in
 `~/projects/adamulanowski.dev/.env` on the VPS. Use a network attached to the proxy;
 creating an unrelated network will not connect the two containers.
 
+The contact form sends email through Resend. Verify `adamulanowski.dev` (preferably
+a sending subdomain such as `mail.adamulanowski.dev`) in Resend and create a
+sending-only API key restricted to that domain. Store the key as a Docker Compose
+secret on the VPS; entering it with `read` keeps it out of shell history:
+
+```bash
+install -d -m 700 ~/projects/adamulanowski.dev/secrets
+read -rsp 'Resend API key: ' RESEND_KEY
+printf '\n'
+printf '%s' "$RESEND_KEY" > ~/projects/adamulanowski.dev/secrets/resend_api_key
+unset RESEND_KEY
+chmod 600 ~/projects/adamulanowski.dev/secrets/resend_api_key
+```
+
+Keep only non-secret settings in `~/projects/adamulanowski.dev/.env`:
+
+```dotenv
+RESEND_FROM_EMAIL=Adam Ułanowski <kontakt@mail.adamulanowski.dev>
+CONTACT_EMAIL_TO=aulanowski98@gmail.com
+```
+
+`RESEND_FROM_EMAIL` must use the exact domain verified in Resend. The API key is
+mounted read-only at `/run/secrets/resend_api_key`, is not exposed through the
+container environment, and is never included in the browser bundle or image.
+The server also stops calling the provider after 80 send attempts in 24 hours,
+leaving headroom below Resend's free daily limit.
+
 Configure the proxy host for `adamulanowski.dev` to forward using HTTP to
 `adamulanowski-web`, port `4000`. Do not use `localhost`: inside the proxy container
 that address refers to the proxy itself.

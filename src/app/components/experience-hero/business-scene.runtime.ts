@@ -38,6 +38,7 @@ export class BusinessSceneRuntime {
   private currentIndustry: IndustryId | null | undefined;
   private currentStep = 0;
   private reducedMotion = false;
+  private mobileMode = false;
   private narrowPanel = false;
   private pointerEnabled = false;
   private readonly pointer = new THREE.Vector2();
@@ -61,7 +62,7 @@ export class BusinessSceneRuntime {
     this.pointerTarget.set(0, 0);
   };
   private readonly motionChange = (event: MediaQueryListEvent): void => {
-    this.reducedMotion = event.matches;
+    this.reducedMotion = event.matches || this.mobileMode;
     if (this.reducedMotion) this.pointerTarget.set(0, 0);
     this.invalidate();
   };
@@ -118,8 +119,9 @@ export class BusinessSceneRuntime {
   init(): void {
     const host = this.host?.nativeElement;
     if (!host) return;
+    this.mobileMode = matchMedia('(max-width: 600px), (pointer: coarse)').matches;
     this.motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
-    this.reducedMotion = this.motionQuery.matches;
+    this.reducedMotion = this.motionQuery.matches || this.mobileMode;
     this.motionQuery.addEventListener('change', this.motionChange);
     this.pointerEnabled = matchMedia('(pointer: fine)').matches;
     host.addEventListener('pointermove', this.pointerMove);
@@ -131,16 +133,16 @@ export class BusinessSceneRuntime {
     this.camera.position.set(...CAMERA_PRESETS[0].position);
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.sceneCanvas!.nativeElement,
-      antialias: true,
+      antialias: !this.mobileMode,
       alpha: true,
       powerPreference: 'high-performance',
     });
     this.renderer.setClearColor(0x090c0a, 0);
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.mobileMode ? 1 : 1.75));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.08;
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = !this.mobileMode;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     // Angular owns the canvas node, preserving it across hydration and option changes.
     // Explicit CSS sizing keeps DPR buffer dimensions out of layout calculations.
@@ -151,14 +153,16 @@ export class BusinessSceneRuntime {
       filter: 'saturate(.96) contrast(1.04)',
     });
 
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    const environment = new RoomEnvironment();
-    try {
-      this.environmentTarget = pmrem.fromScene(environment, 0.035);
-      this.scene.environment = this.environmentTarget.texture;
-    } finally {
-      environment.dispose();
-      pmrem.dispose();
+    if (!this.mobileMode) {
+      const pmrem = new THREE.PMREMGenerator(this.renderer);
+      const environment = new RoomEnvironment();
+      try {
+        this.environmentTarget = pmrem.fromScene(environment, 0.035);
+        this.scene.environment = this.environmentTarget.texture;
+      } finally {
+        environment.dispose();
+        pmrem.dispose();
+      }
     }
 
     this.world = new THREE.Group();
@@ -167,7 +171,7 @@ export class BusinessSceneRuntime {
     this.world.add(this.platform);
     this.buildPlatform(this.platform);
     this.buildLighting();
-    this.prepareMockups();
+    if (!this.mobileMode) this.prepareMockups();
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);
@@ -238,8 +242,8 @@ export class BusinessSceneRuntime {
     this.scene.add(new THREE.HemisphereLight(0xe6f1ea, 0x111512, 2));
     this.keyLight = new THREE.PointLight(0xcfff47, 24, 12);
     this.keyLight.position.set(3.4, 4.2, 4);
-    this.keyLight.castShadow = true;
-    this.keyLight.shadow.mapSize.set(1024, 1024);
+    this.keyLight.castShadow = !this.mobileMode;
+    if (!this.mobileMode) this.keyLight.shadow.mapSize.set(1024, 1024);
     this.scene.add(this.keyLight);
     this.rimLight = new THREE.PointLight(0x48ffb0, 16, 10);
     this.rimLight.position.set(-4, 0.2, 3);
@@ -423,7 +427,9 @@ export class BusinessSceneRuntime {
     const height = Math.max(1, host.clientHeight);
     this.narrowPanel = width / height < 0.9;
     this.renderer.setSize(width, height, false);
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.narrowPanel ? 1.5 : 1.75));
+    this.renderer.setPixelRatio(
+      Math.min(devicePixelRatio, this.mobileMode ? 1 : this.narrowPanel ? 1.5 : 1.75),
+    );
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.invalidate();

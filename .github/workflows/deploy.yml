@@ -75,6 +75,10 @@ jobs:
           script: |
             set -eu
             cd "$HOME/projects/adamulanowski.dev"
+            if [ ! -s secrets/resend_api_key ]; then
+              echo 'Missing secrets/resend_api_key. Provision the Resend sending-only key before deployment.' >&2
+              exit 1
+            fi
             docker compose config --quiet
             printf '%s' "$GHCR_PAT" | docker login ghcr.io --username ulanowskiadam --password-stdin
             docker compose pull web

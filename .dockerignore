@@ -4,3 +4,6 @@ dist
 .git
 .vscode
 *.log
+.env
+.env.*
+secrets

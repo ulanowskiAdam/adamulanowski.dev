@@ -1,5 +1,5 @@
 import { NgComponentOutlet } from '@angular/common';
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SelectedAddons } from './selected-addons';
 import { BusinessScene } from './business-scene';
@@ -19,16 +19,10 @@ export class ExperienceHero {
   name = '';
   contact = '';
   city = '';
-
-  get mailtoLink(): string {
-    const { subject, body } = this.emailDraft();
-    return `mailto:aulanowski98@gmail.com?subject=${subject}&body=${body}`;
-  }
-
-  get gmailLink(): string {
-    const { subject, body } = this.emailDraft();
-    return `https://mail.google.com/mail/?view=cm&fs=1&to=aulanowski98%40gmail.com&su=${subject}&body=${body}`;
-  }
+  message = '';
+  website = '';
+  readonly sendState = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  readonly sendError = signal('');
 
   start(): void {
     this.store.start();
@@ -55,10 +49,52 @@ export class ExperienceHero {
       this.syncScene();
     }
   }
+  async sendMessage(): Promise<void> {
+    if (this.sendState() === 'sending' || this.sendState() === 'sent') return;
+
+    const industry = this.store.industry();
+    if (!industry || !this.name.trim() || !this.contact.trim() || !this.city.trim()) return;
+
+    this.sendState.set('sending');
+    this.sendError.set('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: this.name.trim(),
+          contact: this.contact.trim(),
+          city: this.city.trim(),
+          message: this.message.trim(),
+          website: this.website,
+          industry: industry.label,
+          solutions: this.store.selectedAddons().map((item) => item.label),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Contact request failed');
+      this.sendState.set('sent');
+    } catch {
+      this.sendState.set('error');
+      this.sendError.set('Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.');
+    }
+  }
+
+  editDetails(): void {
+    this.sendState.set('idle');
+    this.sendError.set('');
+    this.back();
+  }
+
   restart(): void {
     this.name = '';
     this.contact = '';
     this.city = '';
+    this.message = '';
+    this.website = '';
+    this.sendState.set('idle');
+    this.sendError.set('');
     this.store.restart();
     this.syncScene();
   }
@@ -67,20 +103,4 @@ export class ExperienceHero {
     this.businessScene?.sync(this.store.industryId(), this.store.step());
   }
 
-  private emailBody(industry: string, solutions: string): string {
-    return `Cześć Adam,\n\nChcę porozmawiać o usprawnieniu dla branży: ${industry}.\n\nWybrane rozwiązania:\n${solutions}\n\nImię: ${this.name.trim()}\nKontakt: ${this.contact.trim()}\nMiasto: ${this.city.trim()}\n\nPozdrawiam!`;
-  }
-
-  private emailDraft(): { subject: string; body: string } {
-    const industry = this.store.industry()?.label ?? 'moja firma';
-    const solutions =
-      this.store
-        .selectedAddons()
-        .map((item) => `- ${item.label}`)
-        .join('\n') || '- do ustalenia';
-    return {
-      subject: encodeURIComponent(`Koncepcja: ${industry}`),
-      body: encodeURIComponent(this.emailBody(industry, solutions).replace(/\r?\n/g, '\r\n')),
-    };
-  }
 }

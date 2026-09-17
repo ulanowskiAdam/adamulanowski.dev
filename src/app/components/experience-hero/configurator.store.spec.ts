@@ -125,7 +125,7 @@ describe('hero configurator', () => {
     disposeGroup(group);
   });
 
-  it('completes the local flow, builds mailto content, and fully restarts', () => {
+  it('completes the flow, sends the selected concept, and fully restarts', async () => {
     const hero = TestBed.runInInjectionContext(() => new ExperienceHero());
     hero.start();
     hero.selectIndustry('fachowcy');
@@ -137,21 +137,21 @@ describe('hero configurator', () => {
     hero.city = 'Gdańsk';
     hero.showResult();
 
-    const mailto = decodeURIComponent(hero.mailtoLink);
     expect(hero.store.step()).toBe(4);
-    expect(mailto).toContain('Imię: Jan');
-    expect(mailto).toContain('Kontakt: jan@example.com');
-    expect(mailto).toContain('Miasto: Gdańsk');
-    expect(mailto).toContain('branży: Fachowcy i usługi');
-    expect(mailto).toContain('Inteligentny formularz zapytania');
-    expect(mailto).toContain('Automatyzacja obsługi zleceń');
-    expect(hero.mailtoLink).toContain('subject=Koncepcja%3A%20Fachowcy%20i%20us%C5%82ugi');
-    expect(hero.mailtoLink).toContain('%0D%0A');
-    expect(hero.mailtoLink).not.toMatch(/\s/);
-    expect(hero.gmailLink).toContain('https://mail.google.com/mail/?view=cm&fs=1');
-    expect(hero.gmailLink).toContain('to=aulanowski98%40gmail.com');
-    expect(hero.gmailLink).toContain('su=Koncepcja%3A%20Fachowcy%20i%20us%C5%82ugi');
-    expect(hero.gmailLink).not.toMatch(/\s/);
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 202 }));
+    await hero.sendMessage();
+
+    expect(hero.sendState()).toBe('sent');
+    expect(fetchSpy).toHaveBeenCalledWith('/api/contact', expect.objectContaining({ method: 'POST' }));
+    const request = fetchSpy.mock.calls[0][1]!;
+    expect(JSON.parse(request.body as string)).toEqual(expect.objectContaining({
+      name: 'Jan',
+      contact: 'jan@example.com',
+      city: 'Gdańsk',
+      industry: 'Fachowcy i usługi',
+      solutions: ['Inteligentny formularz zapytania', 'Automatyzacja obsługi zleceń'],
+    }));
+    fetchSpy.mockRestore();
 
     hero.restart();
     expect(hero.store.step()).toBe(0);
@@ -160,5 +160,7 @@ describe('hero configurator', () => {
     expect(hero.name).toBe('');
     expect(hero.contact).toBe('');
     expect(hero.city).toBe('');
+    expect(hero.message).toBe('');
+    expect(hero.sendState()).toBe('idle');
   });
 });

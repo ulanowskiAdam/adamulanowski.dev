@@ -62,8 +62,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 @media(max-width:560px){.scene-caption{left:.75rem;right:.75rem;font-size:.48rem}.scene-meta{left:.75rem;right:.75rem;font-size:.5rem}}.visual-map .map-industry{top:auto;bottom:0;left:0}
 
 .contact-actions{display:grid;gap:.8rem;max-width:24rem}
-.gmail-button{color:#f2efe599;font:.65rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
-.gmail-button:hover{color:var(--lime)}
+.send-button{width:100%}
+.send-button:disabled{cursor:default;opacity:.78;transform:none}
+.send-feedback{margin:0;font-size:.86rem;line-height:1.5}
+.send-feedback.success{color:var(--lime)}
+.send-feedback.error{color:#ff9c8e}
+.message-field{grid-column:1/-1}
+.message-field textarea{width:100%;min-height:5.5rem;border:1px solid #f2efe521;border-radius:.7rem;outline:0;background:#ffffff05;color:var(--paper);padding:.8rem .9rem;font:1rem/1.4 var(--font-body);resize:vertical;transition:border-color .25s ease,background-color .25s ease,box-shadow .25s ease}
+.message-field textarea:focus{border-color:var(--lime);background:#ffffff08;box-shadow:0 0 0 3px #d3ff4810}
+.message-field textarea::placeholder{color:#f2efe533}
+.message-field textarea:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.bot-field{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+.contact-actions .privacy-note{margin:0}
 
 
 .solutions-panel{--lime:#ccff00;display:flex;flex-direction:column;padding:3rem 1.25rem;min-height:37rem}
@@ -71,3 +81,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .solutions-panel app-selected-addons{flex:none;min-height:7.5rem}
 .configurator{--lime:#ccff00}
 @media(max-width:560px){.solutions-panel{padding:2.5rem .75rem;min-height:34rem}.solutions-panel app-business-scene{min-height:20rem}}
+
+@media(max-width:560px){
+  .hero.configuring{padding:.55rem .75rem 1.5rem}
+  .hero.configuring .hero-nav{display:none}
+  .experience.active{margin-top:0}
+  .experience.active .visual-panel{height:clamp(17rem,42svh,21rem);min-height:0}
+  .configurator .progress-track{margin:.55rem 0 1rem}
+  .configurator legend,.configurator .form-title h2{margin-bottom:.9rem;font-size:clamp(1.65rem,8vw,2.15rem);line-height:1}
+  .configurator .form-title small{display:none}
+  .configurator .form-title h2{font-size:1.45rem;line-height:1.05}
+  .configurator .feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+  .configurator .feature-option{min-height:5.35rem;gap:.5rem;padding:.65rem}
+  .configurator .feature-copy strong{font-size:.76rem;line-height:1.25}
+  .configurator .feature-copy small{display:none}
+  .solutions-panel{padding:2.35rem .65rem 2.15rem}
+  .solutions-panel app-business-scene{min-height:0}
+  .scene-meta>span:first-child,.scene-caption>span:first-child{display:none}
+  .visual-panel,.option,.feature-option{backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+}
