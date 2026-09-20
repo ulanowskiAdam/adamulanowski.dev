@@ -4,7 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# Reduce peak memory usage when building on a small VPS.
+ARG NG_BUILD_MAX_WORKERS=1
+RUN NG_BUILD_MAX_WORKERS=${NG_BUILD_MAX_WORKERS} npm run build
 
 
 FROM node:24-alpine AS runner

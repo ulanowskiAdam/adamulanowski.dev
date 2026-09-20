@@ -2,6 +2,89 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
 
+## VPS deployment behind the reverse proxy
+
+The reverse proxy owns host ports 80 and 443. The website listens on port 4000
+inside Docker and publishes no host port. Both containers must share a Docker
+network. Check the existing proxy's networks on the VPS:
+
+```bash
+docker inspect proxy-app-1 --format '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}'
+```
+
+Compose defaults to the existing `proxy_default` network. If the proxy uses a
+different network, set `PROXY_NETWORK=actual_network_name` in
+`~/projects/adamulanowski.dev/.env` on the VPS. Use a network attached to the proxy;
+creating an unrelated network will not connect the two containers.
+
+The contact form sends email through Resend. Verify `adamulanowski.dev` (preferably
+a sending subdomain such as `mail.adamulanowski.dev`) in Resend and create a
+sending-only API key restricted to that domain. Store the key as a Docker Compose
+secret on the VPS; entering it with `read` keeps it out of shell history:
+
+```bash
+install -d -m 700 ~/projects/adamulanowski.dev/secrets
+read -rsp 'Resend API key: ' RESEND_KEY
+printf '\n'
+printf '%s' "$RESEND_KEY" > ~/projects/adamulanowski.dev/secrets/resend_api_key
+unset RESEND_KEY
+chmod 600 ~/projects/adamulanowski.dev/secrets/resend_api_key
+```
+
+Keep only non-secret settings in `~/projects/adamulanowski.dev/.env`:
+
+```dotenv
+RESEND_FROM_EMAIL=Adam Ułanowski <kontakt@mail.adamulanowski.dev>
+CONTACT_EMAIL_TO=aulanowski98@gmail.com
+```
+
+`RESEND_FROM_EMAIL` must use the exact domain verified in Resend. The API key is
+mounted read-only at `/run/secrets/resend_api_key`, is not exposed through the
+container environment, and is never included in the browser bundle or image.
+The server also stops calling the provider after 80 send attempts in 24 hours,
+leaving headroom below Resend's free daily limit.
+
+Configure the proxy host for `adamulanowski.dev` to forward using HTTP to
+`adamulanowski-web`, port `4000`. Do not use `localhost`: inside the proxy container
+that address refers to the proxy itself.
+
+GitHub Actions copies `docker-compose.yml` to the VPS before each deployment and
+recreates the website container as needed, using the immutable digest produced by
+that build. The server's `.env` is preserved. The workflow requires Docker Compose
+v2 with `--wait`, `--wait-timeout`, and `config --format json` support.
+For a manual deployment, copy the updated Compose file to the VPS, then run:
+
+```bash
+cd ~/projects/adamulanowski.dev
+docker compose config --quiet
+docker compose pull
+docker compose up -d --no-deps --wait --wait-timeout 120 web
+docker exec proxy-app-1 nginx -t && docker exec proxy-app-1 nginx -s reload
+docker compose ps
+```
+
+The healthcheck uses Node (already present in the image) to require HTTP 200 from
+the application. The explicit Host header matches the SSR host allowlist. No host
+port mapping is needed: NPM must use HTTP to `adamulanowski-web:4000`.
+
+Before replacing the container, the workflow checks that NPM is running and
+attached to the configured external network. After startup it tests the upstream
+from NPM's network namespace, then gracefully reloads Nginx to refresh upstream
+resolution after a possible container IP change. This checks upstream connectivity;
+verify public HTTPS separately to check the NPM proxy-host and certificate setup.
+
+On a deployment failure, the workflow prints diagnostics and attempts to restore
+the previous local image using the current Compose configuration. This is an image
+rollback, not a rollback of configuration or data. A first deployment has no image
+to restore. Images are retained for recovery. `WEB_IMAGE` can also be set to a
+specific digest for a manual deployment; otherwise Compose defaults to `latest`.
+
+This is a single-instance deployment with a brief interruption, not zero downtime.
+Compose replaces the container and reconnects its successor to `proxy_default`
+(or the configured external network); it does not preserve existing connections.
+True zero downtime requires two application instances (blue-green), readiness
+verification before switching NPM, and draining the old instance before stopping it.
+
 ## Development server
 
 To start a local development server, run:

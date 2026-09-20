@@ -1,0 +1,128 @@
+name: Build and deploy
+
+on:
+  push:
+    branches:
+      - main
+      - feature/sformatuj-swoj-biznes-configurator
+
+permissions:
+  contents: read
+
+# Both branches publish the same latest tag and deploy to the same VPS.
+concurrency:
+  group: adamulanowski-dev-production
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ulanowskiadam
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/ulanowskiadam/adamulanowski.dev:latest
+            ghcr.io/ulanowskiadam/adamulanowski.dev:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy deployment configuration to VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: docker-compose.yml
+          target: projects/adamulanowski.dev
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          WEB_IMAGE: ghcr.io/ulanowskiadam/adamulanowski.dev@${{ needs.build-and-push.outputs.digest }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: GHCR_PAT,WEB_IMAGE
+          command_timeout: 10m
+          script: |
+            set -eu
+            cd "$HOME/projects/adamulanowski.dev"
+            if [ ! -s secrets/resend_api_key ]; then
+              echo 'Missing secrets/resend_api_key. Provision the Resend sending-only key before deployment.' >&2
+              exit 1
+            fi
+            docker compose config --quiet
+            printf '%s' "$GHCR_PAT" | docker login ghcr.io --username ulanowskiadam --password-stdin
+            docker compose pull web
+
+            # Read the resolved network name, including the server's .env override.
+            network=$(docker compose config --format json | docker run --rm -i --entrypoint node "$WEB_IMAGE" -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => console.log(JSON.parse(s).networks.proxy.name))')
+            docker network inspect "$network" >/dev/null
+            test "$(docker inspect --format '{{.State.Running}}' proxy-app-1)" = true
+            docker inspect --format '{{json .NetworkSettings.Networks}}' proxy-app-1 |
+              docker run --rm -i --entrypoint node "$WEB_IMAGE" -e 'let s=""; process.stdin.on("data", c => s += c); process.stdin.on("end", () => { if (!Object.hasOwn(JSON.parse(s), process.argv[1])) { console.error("Proxy is not attached to " + process.argv[1]); process.exit(1); } })' "$network"
+            docker exec proxy-app-1 nginx -t
+
+            previous_image=$(docker inspect --format '{{.Image}}' adamulanowski-web 2>/dev/null || true)
+            probe_image=$WEB_IMAGE
+            verify_upstream() {
+              # Use NPM's network namespace without requiring curl/wget in NPM.
+              docker run --rm --network container:proxy-app-1 --entrypoint node "$probe_image" -e "require('node:http').get('http://adamulanowski-web:4000/', { headers: { Host: 'adamulanowski.dev' }, timeout: 5000 }, r => { r.resume(); console.log('Upstream HTTP ' + r.statusCode); process.exit(r.statusCode === 200 ? 0 : 1); }).on('timeout', function () { this.destroy(); }).on('error', e => { console.error(e); process.exit(1); })"
+            }
+            refresh_proxy() {
+              docker exec proxy-app-1 nginx -t &&
+              docker exec proxy-app-1 nginx -s reload
+            }
+
+            # Compose recreates a single instance: a brief interruption is expected.
+            # Never run down; the replacement joins the declared external network.
+            if docker compose up -d --no-deps --wait --wait-timeout 120 web &&
+               verify_upstream && refresh_proxy; then
+              docker compose ps
+            else
+              docker compose ps || true
+              docker compose logs --no-color --tail 100 web || true
+              docker inspect --format '{{json .State.Health}}' adamulanowski-web || true
+              if [ -n "$previous_image" ]; then
+                echo 'Deployment failed; restoring the previous local image.'
+                export WEB_IMAGE="$previous_image"
+                if docker compose up -d --no-deps --pull never --wait --wait-timeout 120 web &&
+                   verify_upstream && refresh_proxy; then
+                  echo 'Previous image restored.'
+                else
+                  echo 'Rollback failed; manual intervention required.' >&2
+                fi
+              else
+                echo 'No previous container exists; rollback is unavailable.' >&2
+              fi
+              exit 1
+            fi
+            # Keep previous images available for recovery; do not prune on deploy.
