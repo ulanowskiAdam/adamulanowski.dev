@@ -394,11 +394,14 @@ export class BusinessSceneRuntime {
     if (!this.camera || !this.world) return;
     if (this.stars) this.stars.visible = true;
     const preset = CAMERA_PRESETS[Math.min(5, Math.max(0, this.currentStep))];
-    const distance = Math.max(
-      0,
-      2.8 / (Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2)) * this.camera.aspect) -
-        preset.position[2],
+    // Fit both axes. A wide foldable viewport can otherwise crop the top and
+    // bottom while a narrow one pushes the model too far away.
+    const halfFov = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+    const requiredDistance = Math.max(
+      2.8 / (halfFov * this.camera.aspect),
+      2.4 / halfFov,
     );
+    const distance = Math.max(0, requiredDistance - preset.position[2]);
     const narrowScale = 1;
     const parallaxX =
       this.pointerEnabled && !this.reducedMotion

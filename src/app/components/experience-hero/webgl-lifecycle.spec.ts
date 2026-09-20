@@ -223,6 +223,22 @@ describe('scene frame scheduling', () => {
     runtime.destroy();
   });
 
+  it('fits the scene on both narrow and wide foldable panels', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.reducedMotion = true;
+    state.camera.fov = 37;
+    const halfFov = Math.tan(THREE.MathUtils.degToRad(37 / 2));
+
+    for (const aspect of [0.65, 1, 2.2]) {
+      state.camera.aspect = aspect;
+      state.updateCamera({ time: 0, delta: 1 / 60, reducedMotion: true });
+      expect(state.camera.position.z).toBeGreaterThanOrEqual(2.8 / (halfFov * aspect) - 0.001);
+      expect(state.camera.position.z).toBeGreaterThanOrEqual(2.4 / halfFov - 0.001);
+    }
+    runtime.destroy();
+  });
+
   it('cancels queued frames and never schedules after destruction', () => {
     const raf = vi.fn().mockReturnValue(42);
     const cancel = vi.fn();
