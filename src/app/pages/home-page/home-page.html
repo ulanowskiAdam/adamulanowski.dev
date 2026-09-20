@@ -1,79 +1,150 @@
 <main class="site-shell overflow-hidden">
-	<app-experience-hero />
+  <app-experience-hero />
 
-	<section id="about" class="border-t border-ink/10 bg-paper px-6 py-24 sm:px-10 lg:px-16 lg:py-32"
-		aria-labelledby="about-title">
-		<div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
-			<div>
-				<p class="eyebrow text-coral">01 / o mnie</p>
-				<h2 id="about-title" class="section-title mt-5 max-w-xl">Projektuję cyfrowe miejsca, do których chce się
-					wracać.</h2>
-			</div>
-			<div class="max-w-2xl space-y-6 text-lg leading-8 text-ink/65">
-				<p>Jestem Adam Ułanowski. Łączę frontend, architekturę i automatyzację, żeby z pomysłu zrobić produkt,
-					który działa szybko i ma własny charakter.</p>
-				<p>Ta strona zaczyna się od Twojego biznesu, bo dobra technologia powinna najpierw słuchać, a dopiero
-					potem mówić.</p>
-				<a class="inline-flex items-center gap-3 font-mono text-sm font-bold uppercase tracking-[0.14em] text-ink transition-colors hover:text-coral"
-					href="#contact">
-					Porozmawiajmy <span aria-hidden="true">↗</span>
-				</a>
-			</div>
-		</div>
-	</section>
+  <section id="about" class="about" aria-labelledby="about-title">
+    <div class="about-inner">
+      <div class="about-heading">
+        <p class="eyebrow">01 / o mnie</p>
+        <span>Od człowieka, który będzie pisał Twój kod.</span>
+      </div>
+      <div class="profile-layout">
+        <aside class="profile-card" aria-label="Portret i kontakt">
+          <app-about-portrait />
+          <p class="profile-role">Full-stack developer<br />Web / automatyzacje / AI</p>
+          <a class="profile-link" href="mailto:aulanowski98@gmail.com"
+            >Napisz do mnie <span aria-hidden="true">↗</span></a
+          >
+          <a class="profile-link" href="https://github.com/ulanowskiAdam"
+            >Zajrzyj na GitHub <span aria-hidden="true">↗</span></a
+          >
+        </aside>
+        <div class="profile-story">
+          <h2 id="about-title">Cześć, jestem Adam<span>.</span></h2>
+          <p class="profile-intro">
+            Łączę to, co widzisz na ekranie,<br class="desktop-break" />
+            z tym, co dzieje się pod spodem.
+          </p>
+          <div class="profile-bio">
+            <p>
+              Nazywam się Adam Ułanowski. Tworzę strony internetowe i aplikacje webowe — od
+              interfejsu, przez logikę działania, po połączenia z innymi systemami. Pracuję zarówno
+              przy frontendzie, jak i backendzie, więc patrzę na produkt jako całość.
+            </p>
+            <p>
+              Lubię projekty, które ułatwiają codzienną pracę: harmonogramy, rezerwacje, kreatory i
+              konfiguratory. Korzystam też z n8n i narzędzi AI, żeby łączyć procesy i ograniczać
+              powtarzalne zadania.
+            </p>
+          </div>
+          <div class="profile-approach">
+            <span aria-hidden="true">↳</span>
+            <p>
+              Zaczynam od rozmowy o tym, jak działa Twoja firma. Dopiero potem dobieram technologie
+              i układam rozwiązanie.
+            </p>
+          </div>
+          <div class="profile-tools">
+            <h3>Mój warsztat</h3>
+            <dl>
+              <div>
+                <dt>Frontend</dt>
+                <dd>Angular <span>/</span> Vue <span>/</span> Nuxt</dd>
+              </div>
+              <div>
+                <dt>Backend</dt>
+                <dd>Node.js <span>/</span> Express <span>/</span> Java</dd>
+              </div>
+              <div>
+                <dt>Integracje</dt>
+                <dd>n8n <span>/</span> API <span>/</span> narzędzia AI</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-	<section id="capabilities" class="bg-ink px-6 py-24 text-paper sm:px-10 lg:px-16 lg:py-32"
-		aria-labelledby="capabilities-title">
-		<div class="mx-auto max-w-7xl">
-			<div class="max-w-3xl">
-				<p class="eyebrow text-lime">02 / możliwości</p>
-				<h2 id="capabilities-title" class="section-title mt-5">Od pierwszego ekranu do momentu, w którym produkt
-					zaczyna pracować.</h2>
-			</div>
-			<div class="mt-16 grid gap-px overflow-hidden border border-paper/15 bg-paper/15 md:grid-cols-3">
-				<article class="bg-ink p-7 transition-colors hover:bg-paper/10 sm:p-9">
-					<span class="font-mono text-sm text-lime">01</span>
-					<h3 class="mt-14 text-2xl font-semibold">Interfejsy</h3>
-					<p class="mt-4 leading-7 text-paper/60">Wyraziste, dostępne doświadczenia, które prowadzą
-						użytkownika bez zbędnego hałasu.</p>
-				</article>
-				<article class="bg-ink p-7 transition-colors hover:bg-paper/10 sm:p-9">
-					<span class="font-mono text-sm text-lime">02</span>
-					<h3 class="mt-14 text-2xl font-semibold">Architektura</h3>
-					<p class="mt-4 leading-7 text-paper/60">Frontend oparty na mocnych fundamentach: Angular,
-						TypeScript, SSR i świadome granice.</p>
-				</article>
-				<article class="bg-ink p-7 transition-colors hover:bg-paper/10 sm:p-9">
-					<span class="font-mono text-sm text-lime">03</span>
-					<h3 class="mt-14 text-2xl font-semibold">Automatyzacja</h3>
-					<p class="mt-4 leading-7 text-paper/60">Mniej ręcznej pracy, więcej przestrzeni na decyzje, które
-						naprawdę wymagają człowieka.</p>
-				</article>
-			</div>
-		</div>
-	</section>
+  <section id="capabilities" class="services" aria-labelledby="capabilities-title">
+    <div class="about-inner">
+      <p class="eyebrow">02 / co możemy zbudować</p>
+      <div class="services-heading">
+        <h2 id="capabilities-title">Mniej klikania.<br /><em>Więcej możliwości.</em></h2>
+        <p>
+          Technologia ma rozwiązywać konkretny problem. Zacznijmy od tego, co zajmuje czas Tobie i
+          Twoim klientom.
+        </p>
+      </div>
+      <div class="service-grid">
+        <article>
+          <span class="service-number">01 / WEB</span>
+          <h3>Strony internetowe<br />i aplikacje webowe</h3>
+          <p>
+            Responsywne strony firmowe, portale i panele klienta. Czytelna oferta, wygodna obsługa
+            na telefonie i funkcje dopasowane do Twoich procesów.
+          </p>
+          <span class="service-example">Od wizytówki po własny system ↗</span>
+        </article>
+        <article>
+          <span class="service-number">02 / PLANOWANIE</span>
+          <h3>Harmonogramy<br />i systemy rezerwacji</h3>
+          <p>
+            Kalendarze wizyt, grafiki zespołów i zarządzanie dostępnością. Rezerwacje online i
+            przypomnienia, które ograniczają ręczne ustalanie terminów.
+          </p>
+          <span class="service-example">Usługi · zespoły · terminy ↗</span>
+        </article>
+        <article>
+          <span class="service-number">03 / KONFIGURACJA</span>
+          <h3>Kreatory<br />i konfiguratory</h3>
+          <p>
+            Kreatory produktów, kalkulatory wycen i formularze zamówień. Klient wybiera warianty, a
+            Ty otrzymujesz uporządkowane zapytanie.
+          </p>
+          <span class="service-example">Od wyboru do zapytania ↗</span>
+        </article>
+        <article>
+          <span class="service-number">04 / AUTOMATYZACJA</span>
+          <h3>Integracje n8n<br />i narzędzia AI</h3>
+          <p>
+            Łączenie formularzy, poczty, CRM i API. Automatyzacja powtarzalnych zadań oraz
+            integracje AI wspierające pracę z informacjami i obsługę klienta.
+          </p>
+          <span class="service-example">Mniej kopiowania między systemami ↗</span>
+        </article>
+      </div>
+      <div class="work-note">
+        <span aria-hidden="true">↳</span>
+        <p>
+          <strong>Najpierw potrzeba, potem technologia.</strong> Pracuję z Angular, Vue i Nuxt na
+          frontendzie, Node.js, Express i Javą na backendzie, a procesy łączę przez n8n, API i
+          narzędzia AI.
+        </p>
+      </div>
+    </div>
+  </section>
 
-	<section id="contact" class="bg-coral px-6 py-24 text-ink sm:px-10 lg:px-16 lg:py-32"
-		aria-labelledby="contact-title">
-		<div class="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1fr_auto] lg:items-end">
-			<div>
-				<p class="eyebrow">03 / kontakt</p>
-				<h2 id="contact-title" class="section-title mt-5 max-w-3xl">Masz biznes, który chce wyglądać jak on sam?
-				</h2>
-			</div>
-			<a class="group inline-flex items-center gap-5 text-xl font-semibold sm:text-2xl"
-				href="#configurator">
-				Przejdź do formularza
-				<span
-					class="grid size-14 place-items-center rounded-full border border-ink/30 transition-transform group-hover:rotate-45"
-					aria-hidden="true">↗</span>
-			</a>
-		</div>
-	</section>
-
-	<footer
-		class="flex flex-col gap-4 bg-ink px-6 py-8 text-sm text-paper/50 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-16">
-		<span class="font-mono">adamulanowski.dev</span>
-		<span>Frontend / systems / experiments</span>
-	</footer>
+  <section id="contact" class="contact" aria-labelledby="contact-title">
+    <div class="about-inner contact-grid">
+      <div>
+        <p class="eyebrow">03 / porozmawiajmy o Twoim projekcie</p>
+        <h2 id="contact-title">Co chcesz<br />sobie <em>ułatwić?</em></h2>
+      </div>
+      <div class="contact-copy">
+        <p>
+          Opowiedz mi o aplikacji, stronie lub procesie, który chcesz usprawnić. Zacznij od
+          krótkiego konfiguratora albo napisz bezpośrednio.
+        </p>
+        <a class="about-cta" href="#configurator"
+          >Stwórz swoją koncepcję <span aria-hidden="true">↗</span></a
+        ><a class="about-email" href="mailto:aulanowski98@gmail.com"
+          >aulanowski98&#64;gmail.com ↗</a
+        >
+      </div>
+    </div>
+  </section>
+  <footer class="site-footer">
+    <span>© Adam Ułanowski</span><span>Web development / automatyzacje / AI</span
+    ><a href="https://github.com/ulanowskiAdam">GitHub ↗</a>
+  </footer>
 </main>
