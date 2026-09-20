@@ -195,13 +195,13 @@ export class ConfiguratorStore {
     this.selectedAddonIds.set(next);
   }
   next(): void {
-    if (this.step() < 3) this.step.update((step) => step + 1);
+    if (this.step() === 1 && this.industryId()) this.step.set(2);
   }
   back(): void {
     if (this.step() > 1) this.step.update((step) => step - 1);
   }
   showResult(): void {
-    this.step.set(4);
+    if (this.industryId()) this.step.set(2);
   }
   restart(): void {
     this.step.set(0);

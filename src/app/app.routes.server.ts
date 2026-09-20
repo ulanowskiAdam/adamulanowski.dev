@@ -1,8 +1,8 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
-
 export const serverRoutes: ServerRoute[] = [
-  {
-    path: '**',
-    renderMode: RenderMode.Prerender
-  }
+  ...['', 'o-mnie', 'polityka-prywatnosci', 'demo/konfigurator'].map((path) => ({
+    path,
+    renderMode: RenderMode.Prerender as const,
+  })),
+  { path: '**', renderMode: RenderMode.Server, status: 404 },
 ];

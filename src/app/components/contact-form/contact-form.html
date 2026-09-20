@@ -1,0 +1,97 @@
+<form (ngSubmit)="submit()" novalidate [attr.aria-busy]="state() === 'sending'">
+  <p class="hint" id="contact-required">E-mail i wiadomość są wymagane. Imię jest opcjonalne.</p>
+  @if (context()) {
+    <div class="context">
+      <p>Kontekst z demonstracji: {{ context() }}</p>
+      <button
+        type="button"
+        (click)="context.set('')"
+        [disabled]="state() === 'sending' || state() === 'accepted'"
+      >
+        Usuń kontekst
+      </button>
+    </div>
+  }
+  <label for="name">Imię <span>(opcjonalnie)</span></label>
+  <input
+    id="name"
+    name="name"
+    [(ngModel)]="name"
+    (ngModelChange)="clearError('name')"
+    autocomplete="given-name"
+    maxlength="100"
+    [readOnly]="state() === 'sending' || state() === 'accepted'"
+    [attr.aria-invalid]="!!errors().name"
+    [attr.aria-describedby]="errors().name ? 'name-error' : null"
+  />
+  @if (errors().name) {
+    <p id="name-error" class="field-error">{{ errors().name }}</p>
+  }
+  <label for="email">E-mail <span>(wymagany)</span></label>
+  <input
+    id="email"
+    name="email"
+    type="email"
+    [(ngModel)]="email"
+    (ngModelChange)="clearError('email')"
+    autocomplete="email"
+    required
+    maxlength="254"
+    [readOnly]="state() === 'sending' || state() === 'accepted'"
+    [attr.aria-invalid]="!!errors().email"
+    [attr.aria-describedby]="errors().email ? 'email-error' : null"
+  />
+  @if (errors().email) {
+    <p id="email-error" class="field-error">{{ errors().email }}</p>
+  }
+  <label for="message">Wiadomość <span>(wymagana)</span></label>
+  <textarea
+    id="message"
+    name="message"
+    [(ngModel)]="message"
+    (ngModelChange)="clearError('message')"
+    rows="6"
+    required
+    maxlength="2000"
+    [readOnly]="state() === 'sending' || state() === 'accepted'"
+    [attr.aria-invalid]="!!errors().message"
+    [attr.aria-describedby]="errors().message ? 'message-hint message-error' : 'message-hint'"
+  ></textarea>
+  <p id="message-hint" class="hint">
+    {{ message.length }} / 2000 znaków. Opisz pomysł lub zadanie, które chcesz ułatwić.
+  </p>
+  @if (errors().message) {
+    <p id="message-error" class="field-error">{{ errors().message }}</p>
+  }
+  <div class="honeypot" aria-hidden="true">
+    <label for="website">Zostaw to pole puste</label
+    ><input id="website" name="website" [(ngModel)]="website" tabindex="-1" autocomplete="off" />
+  </div>
+  <p class="privacy">
+    Dane posłużą do obsługi zapytania.
+    <a routerLink="/polityka-prywatnosci">Polityka prywatności</a>.
+  </p>
+  <button
+    class="button primary"
+    type="submit"
+    [disabled]="state() === 'sending' || state() === 'accepted'"
+  >
+    {{
+      state() === 'sending'
+        ? 'Wysyłanie…'
+        : state() === 'accepted'
+          ? 'Przyjęto do wysłania'
+          : 'Wyślij wiadomość'
+    }}
+  </button>
+  @if (feedback()) {
+    <p
+      class="feedback"
+      [class.field-error]="state() === 'error'"
+      [attr.role]="state() === 'accepted' ? 'status' : 'alert'"
+      tabindex="-1"
+    >
+      {{ feedback() }}
+    </p>
+  }
+</form>

@@ -4,12 +4,12 @@ import {
   Component,
   effect,
   ElementRef,
-  ErrorHandler,
   inject,
   input,
   NgZone,
   OnDestroy,
   PLATFORM_ID,
+  signal,
   ViewChild,
 } from '@angular/core';
 import type { IndustryId } from './configurator.store';
@@ -20,19 +20,24 @@ import type { BusinessSceneRuntime } from './business-scene.runtime';
   standalone: true,
   template: `<div #host class="canvas-host">
     <canvas #sceneCanvas class="scene-canvas" aria-hidden="true"></canvas>
+    @if (unavailable()) {
+      <p role="status" style="position:absolute;inset:24px;color:var(--muted)">
+        Podgląd 3D jest niedostępny. Nadal możesz wybierać rozwiązania i korzystać z podsumowania.
+      </p>
+    }
   </div>`,
   styles: [
     ':host,.canvas-host{position:absolute;inset:0;display:block}.canvas-host canvas{display:block;width:100%;height:100%;filter:saturate(.96) contrast(1.04)}',
   ],
 })
 export class BusinessScene implements OnDestroy {
+  readonly unavailable = signal(false);
   @ViewChild('host') host?: ElementRef<HTMLElement>;
   @ViewChild('sceneCanvas') sceneCanvas?: ElementRef<HTMLCanvasElement>;
   readonly industry = input<IndustryId | null>(null);
   readonly step = input(0);
 
   private readonly zone = inject(NgZone);
-  private readonly errors = inject(ErrorHandler);
   private runtime?: BusinessSceneRuntime;
   private destroyed = false;
 
@@ -54,9 +59,10 @@ export class BusinessScene implements OnDestroy {
               this.runtime.init();
             });
           })
-          .catch((error) => {
+          .catch(() => {
             this.runtime?.destroy();
-            this.errors.handleError(error);
+            this.runtime = undefined;
+            if (!this.destroyed) this.zone.run(() => this.unavailable.set(true));
           });
       });
     });

@@ -1,106 +1,49 @@
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgComponentOutlet } from '@angular/common';
-import { Component, inject, signal, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { SelectedAddons } from './selected-addons';
 import { BusinessScene } from './business-scene';
+import { SelectedAddons } from './selected-addons';
+import { AboutPortrait } from '../about-portrait/about-portrait';
 import { AddonId, ConfiguratorStore, IndustryId } from './configurator.store';
 
 @Component({
   selector: 'app-experience-hero',
-  standalone: true,
-  imports: [FormsModule, NgComponentOutlet, BusinessScene, SelectedAddons],
+  imports: [RouterLink, NgComponentOutlet, BusinessScene, SelectedAddons, AboutPortrait],
+  providers: [ConfiguratorStore],
   templateUrl: './experience-hero.html',
   styleUrl: './experience-hero.scss',
 })
 export class ExperienceHero {
-  @ViewChild(BusinessScene, { static: true }) private businessScene?: BusinessScene;
-
+  @ViewChild('stepTitle') private stepTitle?: ElementRef<HTMLElement>;
   readonly store = inject(ConfiguratorStore);
-  name = '';
-  contact = '';
-  city = '';
-  message = '';
-  website = '';
-  readonly sendState = signal<'idle' | 'sending' | 'sent' | 'error'>('idle');
-  readonly sendError = signal('');
-
-  start(): void {
+  showVisual = false;
+  start() {
     this.store.start();
-    this.syncScene();
+    this.focusStep();
   }
-  selectIndustry(id: IndustryId): void {
+  selectIndustry(id: IndustryId) {
     this.store.selectIndustry(id);
-    this.syncScene();
   }
-  toggleAddon(id: AddonId): void {
+  toggleAddon(id: AddonId) {
     this.store.toggleAddon(id);
   }
-  next(): void {
+  next() {
     this.store.next();
-    this.syncScene();
+    this.focusStep();
   }
-  back(): void {
+  back() {
     this.store.back();
-    this.syncScene();
+    this.focusStep();
   }
-  showResult(): void {
-    if (this.name.trim() && this.contact.trim() && this.city.trim()) {
-      this.store.showResult();
-      this.syncScene();
-    }
-  }
-  async sendMessage(): Promise<void> {
-    if (this.sendState() === 'sending' || this.sendState() === 'sent') return;
-
-    const industry = this.store.industry();
-    if (!industry || !this.name.trim() || !this.contact.trim() || !this.city.trim()) return;
-
-    this.sendState.set('sending');
-    this.sendError.set('');
-
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: this.name.trim(),
-          contact: this.contact.trim(),
-          city: this.city.trim(),
-          message: this.message.trim(),
-          website: this.website,
-          industry: industry.label,
-          solutions: this.store.selectedAddons().map((item) => item.label),
-        }),
-      });
-
-      if (!response.ok) throw new Error('Contact request failed');
-      this.sendState.set('sent');
-    } catch {
-      this.sendState.set('error');
-      this.sendError.set('Nie udało się wysłać wiadomości. Spróbuj ponownie za chwilę.');
-    }
-  }
-
-  editDetails(): void {
-    this.sendState.set('idle');
-    this.sendError.set('');
-    this.back();
-  }
-
-  restart(): void {
-    this.name = '';
-    this.contact = '';
-    this.city = '';
-    this.message = '';
-    this.website = '';
-    this.sendState.set('idle');
-    this.sendError.set('');
+  restart() {
     this.store.restart();
-    this.syncScene();
   }
-
-  private syncScene(): void {
-    this.businessScene?.sync(this.store.industryId(), this.store.step());
+  private focusStep() {
+    setTimeout(() => this.stepTitle?.nativeElement.focus());
   }
-
+  get context() {
+    return [this.store.industry()?.label, ...this.store.selectedAddons().map((item) => item.label)]
+      .filter(Boolean)
+      .join(' — ');
+  }
 }

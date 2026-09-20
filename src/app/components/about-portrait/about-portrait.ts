@@ -89,7 +89,7 @@ import type { PortraitScene } from './portrait-scene';
       justify-content: space-between;
       gap: 0.5rem;
       color: #f2efe577;
-      font: 0.6rem/1.5 var(--font-mono);
+      font: 14px/1.5 var(--font-body);
     }
     .stage-meta {
       top: 1.1rem;
@@ -127,7 +127,7 @@ import type { PortraitScene } from './portrait-scene';
     @media (max-width: 360px) {
       .stage-meta,
       .stage-bottom {
-        font-size: 0.52rem;
+        font-size: 14px;
         left: 0.8rem;
         right: 0.8rem;
       }

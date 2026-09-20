@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+form {
+  position: relative;
+}
+label {
+  display: block;
+  margin: 22px 0 8px;
+  font-weight: 600;
+}
+label span {
+  font-weight: 400;
+  color: var(--muted);
+}
+input,
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--input-border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: var(--surface);
+}
+textarea {
+  resize: vertical;
+}
+[aria-invalid='true'] {
+  border-color: var(--error);
+}
+.hint,
+.privacy,
+.field-error,
+.feedback,
+.context {
+  font-size: 14px;
+  margin-top: 8px;
+  color: var(--muted);
+}
+.field-error {
+  color: var(--error);
+}
+.privacy {
+  margin-block: 24px;
+}
+.privacy a {
+  text-decoration: underline;
+}
+.feedback {
+  margin-top: 20px;
+}
+.honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.context {
+  padding: 16px;
+  border: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.context button {
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 10px 0;
+  text-decoration: underline;
+}

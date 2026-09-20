@@ -1,153 +1,124 @@
-@let step = store.step();
-<section id="configurator" class="hero" [class.configuring]="step > 0" aria-labelledby="hero-title">
-  <div class="hero-grid" aria-hidden="true"></div>
-  <div class="hero-glow glow-a" aria-hidden="true"></div>
-  <div class="hero-glow glow-b" aria-hidden="true"></div>
-  <nav class="hero-nav" aria-label="Główna nawigacja">
-    <a class="brand" href="/" aria-label="Adam Ułanowski — strona główna">A<span>.</span></a>
-    <div class="nav-meta"><span>AU / SYSTEM 26</span><a href="#about">Poznaj autora ↘</a></div>
-  </nav>
-
-  <div class="experience" [class.active]="step > 0">
-    <div class="copy-panel">
-      @if (step === 0) {
-      <div class="intro">
-        <p class="eyebrow lime"><i class="status-dot"></i> Signature experience / online</p>
-        <h1 id="hero-title">Zobacz, co możemy<br /><em>zbudować dla Twojej firmy</em></h1>
-        <p class="lead">Wybierz branżę i proces, który warto usprawnić. W minutę otrzymasz koncepcję aplikacji,
-          integracji lub automatyzacji.</p>
-        <button class="primary-button" type="button" (click)="start()">Stwórz swoją koncepcję <span>↗</span></button>
-        <p class="time-note">4 krótkie kroki · około 60 sekund</p>
-      </div>
-      } @else if (step < 4) { <div class="configurator enter">
-        <div class="progress-head">
-          <p class="eyebrow lime">Konfigurator / 0{{ step }}</p><span>{{ step }} z 3</span>
-        </div>
-        <div class="progress-track" aria-hidden="true"><i [style.width.%]="step * 25"></i></div>
-
+<main id="main" class="container demo" tabindex="-1">
+  <p class="eyebrow">Opcjonalna demonstracja</p>
+  <h1>Sprawdź pomysł na usprawnienie.</h1>
+  <p class="intro">
+    Wybierz przykładową branżę i potrzebne funkcje. Dwa kroki, bez danych kontaktowych. To
+    inspiracja — rozwiązania tworzę także dla innych branż.
+  </p>
+  @let step = store.step();
+  @if (step === 0) {
+    <button type="button" class="button primary" (click)="start()">Uruchom demonstrację</button>
+  } @else {
+    <p class="progress" role="status">
+      Krok {{ step }} z 2:
+      {{ step === 1 ? 'przykładowa branża' : 'wybór rozwiązań i podsumowanie' }}
+    </p>
+    <div class="demo-layout">
+      <div>
         @if (step === 1) {
-        <fieldset>
-          <legend><small>Wybierz branżę</small>Gdzie działasz?</legend>
-          <div class="option-list">
-            @for (item of store.industries; track item.id; let index = $index) {
-            <button type="button" class="option" [class.selected]="store.industryId() === item.id"
-              [attr.aria-pressed]="store.industryId() === item.id" (click)="selectIndustry(item.id)">
-              <span>0{{ index + 1 }}</span><span class="ui-icon"><ng-container
-                  *ngComponentOutlet="item.icon"></ng-container></span><b>{{ item.label }}</b><i>↗</i>
-            </button>
-            }
+          <fieldset>
+            <legend #stepTitle tabindex="-1">Wybierz przykładową branżę</legend>
+            <div class="options">
+              @for (item of store.industries; track item.id) {
+                <button
+                  class="option"
+                  type="button"
+                  [attr.aria-pressed]="store.industryId() === item.id"
+                  (click)="selectIndustry(item.id)"
+                >
+                  <span aria-hidden="true"><ng-container *ngComponentOutlet="item.icon" /></span
+                  >{{ item.label }}
+                </button>
+              }
+            </div>
+          </fieldset>
+          <button
+            class="button primary"
+            type="button"
+            [disabled]="!store.industryId()"
+            (click)="next()"
+          >
+            Dalej: wybierz rozwiązania →
+          </button>
+        } @else {
+          <fieldset>
+            <legend #stepTitle tabindex="-1">Co warto usprawnić?</legend>
+            <p class="muted">Możesz wybrać kilka funkcji.</p>
+            <div class="options">
+              @for (item of store.addons(); track item.id) {
+                <button
+                  class="option"
+                  type="button"
+                  [attr.aria-pressed]="store.selectedAddonIds().has(item.id)"
+                  (click)="toggleAddon(item.id)"
+                >
+                  <span aria-hidden="true"><ng-container *ngComponentOutlet="item.icon" /></span
+                  ><span
+                    ><strong>{{ item.label }}</strong
+                    ><small>{{ item.description }}</small></span
+                  >
+                </button>
+              }
+            </div>
+          </fieldset>
+          <section class="summary" aria-labelledby="summary-title">
+            <h2 id="summary-title">Twoja koncepcja</h2>
+            <p>{{ store.industry()?.label }}</p>
+            <ul>
+              @for (item of store.selectedAddons(); track item.id) {
+                <li>{{ item.label }}</li>
+              } @empty {
+                <li>Wybierz funkcje powyżej, aby uzupełnić koncepcję.</li>
+              }
+            </ul>
+            <a
+              class="button primary"
+              routerLink="/"
+              fragment="contact"
+              [queryParams]="{ context: context }"
+              >Porozmawiajmy o tej koncepcji ↗</a
+            >
+          </section>
+          <div class="actions">
+            <button class="button" type="button" (click)="back()">← Zmień branżę</button
+            ><button class="button" type="button" (click)="restart()">Zacznij od nowa</button>
           </div>
-        </fieldset>
         }
-        @if (step === 2) {
-        <fieldset>
-          <legend><small>Wybierz rozwiązania</small>Co warto usprawnić?</legend>
-          <p class="field-hint">Możesz wybrać kilka elementów. Połączymy je w jedną spójną koncepcję.</p>
-          <div class="feature-grid">
-            @for (item of store.addons(); track item.id) {
-            <button type="button" class="feature-option" [class.selected]="store.selectedAddonIds().has(item.id)"
-              [attr.aria-pressed]="store.selectedAddonIds().has(item.id)" (click)="toggleAddon(item.id)">
-              <span class="ui-icon feature-icon"><ng-container *ngComponentOutlet="item.icon"></ng-container></span>
-              <span class="feature-copy"><strong>{{ item.label }}</strong><small>{{ item.description }}</small></span>
-              <i aria-hidden="true">+</i>
-            </button>
-            }
-          </div>
-        </fieldset>
-        }
-        @if (step === 3) {
-        <form (ngSubmit)="showResult()">
-          <div class="form-title"><small>Ostatni krok</small>
-            <h2>Dopasujmy koncepcję do Twojej firmy</h2>
-          </div>
-          <label>Jak masz na imię?<input name="name" [(ngModel)]="name" autocomplete="name" maxlength="100" required
-              placeholder="Adam" /></label>
-          <label>Telefon lub e-mail<input name="contact" [(ngModel)]="contact" maxlength="200" required
-              placeholder="Twój kontakt" /></label>
-          <label>W jakim mieście działasz?<input name="city" [(ngModel)]="city" autocomplete="address-level2" maxlength="100" required
-              placeholder="Warszawa" /></label>
-          <label class="message-field">Chcesz coś dodać?<textarea name="message" [(ngModel)]="message" maxlength="2000" rows="3"
-              placeholder="Krótko opisz, czego potrzebujesz (opcjonalnie)"></textarea></label>
-          <label class="bot-field" aria-hidden="true">Strona internetowa<input name="website" [(ngModel)]="website"
-              autocomplete="off" tabindex="-1" /></label>
-          <button class="result-button" type="submit">Pokaż moją koncepcję <span>↗</span></button>
-          <p class="privacy-note">W następnym kroku sprawdzisz podsumowanie przed wysłaniem wiadomości.</p>
-        </form>
-        }
-        <div class="step-actions">
-          @if (step > 1) { <button type="button" class="back-button" (click)="back()">← Wstecz</button> }
-          @if (step < 3) { <button type="button" class="next-button" (click)="next()"
-            [disabled]="(step === 1 && !store.industryId()) || (step === 2 && store.selectedAddonIds().size === 0)">
-            Dalej <span>→</span></button>
-            }
-        </div>
-    </div>
-    } @else {
-    <div class="result-copy enter">
-      <p class="eyebrow lime"><i class="status-dot"></i> Koncepcja gotowa</p>
-      <h2>Pomysł na cyfrowe usprawnienie Twojej firmy</h2>
-      <dl class="result-summary">
-        <div>
-          <dt>Branża</dt>
-          <dd>{{ store.industry()?.label }}</dd>
-        </div>
-        <div>
-          <dt>Rozwiązania</dt>
-          <dd><span class="result-tags">@for (item of store.selectedAddons(); track item.id) { <span>{{ item.label
-                }}</span> }</span></dd>
-        </div>
-        <div>
-          <dt>Kontakt</dt>
-          <dd>{{ name }} · {{ contact }} · {{ city }}</dd>
-        </div>
-        @if (message) {
-        <div>
-          <dt>Wiadomość</dt>
-          <dd>{{ message }}</dd>
-        </div>
-        }
-      </dl>
-      <p class="result-lead">Wybrane elementy możemy połączyć w jedną aplikację dopasowaną do sposobu działania Twojej
-        firmy.</p>
-      <div class="contact-actions">
-        <button class="primary-button send-button" type="button" (click)="sendMessage()"
-          [disabled]="sendState() === 'sending' || sendState() === 'sent'">
-          @if (sendState() === 'sending') { Wysyłanie… }
-          @else if (sendState() === 'sent') { Wiadomość wysłana ✓ }
-          @else { Wyślij wiadomość <span>↗</span> }
-        </button>
-        @if (sendState() === 'sent') {
-        <p class="send-feedback success" role="status">Dziękuję! Wiadomość dotarła — odezwę się najszybciej, jak to możliwe.</p>
-        } @else if (sendState() === 'error') {
-        <p class="send-feedback error" role="alert">{{ sendError() }}</p>
-        }
-        <p class="privacy-note">Klikając „Wyślij wiadomość”, przekazujesz dane wyłącznie w celu odpowiedzi na zapytanie.</p>
       </div>
-      @if (sendState() !== 'sent') {
-      <button class="restart-button" type="button" (click)="editDetails()" [disabled]="sendState() === 'sending'">← Edytuj dane</button>
-      }
-      <button class="restart-button" type="button" (click)="restart()">Zacznij od nowa</button>
+      <aside aria-label="Podgląd koncepcji">
+        <button
+          class="button"
+          type="button"
+          (click)="showVisual = !showVisual"
+          [attr.aria-pressed]="showVisual"
+        >
+          {{ showVisual ? 'Ukryj podgląd 3D' : 'Włącz podgląd 3D' }}
+        </button>
+        @if (showVisual) {
+          <div class="visual">
+            <app-business-scene [industry]="store.industryId()" [step]="step" />
+          </div>
+          <app-selected-addons
+            [addons]="store.selectedAddons()"
+            [activeId]="store.activeAddonId()"
+          />
+        }
+        <p class="visual-note">
+          Podgląd jest dodatkiem. Wybór i podsumowanie działają również bez WebGL. Przy ograniczeniu
+          ruchu scena pozostaje statyczna.
+        </p>
+      </aside>
     </div>
+  }
+  <p class="direct">
+    <a routerLink="/" fragment="contact">Przejdź do kontaktu bez demonstracji ↗</a>
+  </p>
+  <details>
+    <summary>Jeszcze jeden przykład: interaktywny portret</summary>
+    @defer (on interaction) {
+      <div class="portrait"><app-about-portrait /></div>
+    } @placeholder {
+      <button class="button" type="button">Pokaż portret 3D</button>
     }
-  </div>
-
-  <div class="visual-panel"
-    [class.solutions-panel]="step >= 2">
-    <div class="scene-meta"><span>Three.js / digital twin</span><span>0{{ step }}/05</span></div>
-    <app-business-scene [industry]="store.industryId()" [step]="step" />
-    <div class="reticle reticle-a" aria-hidden="true"></div>
-    <div class="reticle reticle-b" aria-hidden="true"></div>
-    @if (step >= 2) {
-    <app-selected-addons [addons]="store.selectedAddons()" [activeId]="store.activeAddonId()" />
-    }
-    <div class="visual-map" aria-hidden="true">
-      @if (store.industry() && step === 1) { <span class="map-industry"><i>01 / rdzeń</i>{{ store.industry()?.sceneLabel
-        }}</span> }
-    </div>
-    <div class="scene-caption"><span>{{ step === 0 ? 'Core awaiting input' : step === 4 ? 'Digital twin ready' :
-        'Synchronizacja w czasie rzeczywistym' }}</span><span class="live"><i></i>{{ step === 4 ? 'Complete' : 'Live'
-        }}</span></div>
-  </div>
-  </div>
-  <a class="scroll-cue" href="#about"><span>Kim jest autor?</span><i></i></a>
-</section>
+  </details>
+</main>

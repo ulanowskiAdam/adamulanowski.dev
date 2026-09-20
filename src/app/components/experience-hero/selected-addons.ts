@@ -67,7 +67,7 @@ import { AddonDefinition, AddonId } from './configurator.store';
         backdrop-filter: blur(18px) saturate(135%);
         -webkit-backdrop-filter: blur(18px) saturate(135%);
         color: var(--paper);
-        font: 600 clamp(0.6rem, 2.3cqw, 0.75rem)/1.35 var(--font-mono);
+        font: 600 14px/1.35 var(--font-body);
         letter-spacing: -0.01em;
         transition:
           border-color 0.35s ease,

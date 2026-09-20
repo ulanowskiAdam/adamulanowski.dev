@@ -140,3 +140,61 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Refaktoryzacja oferty i kontaktu
+
+- Strona główna i podstrony /o-mnie, /polityka-prywatnosci, /demo/konfigurator są prerenderowane.
+- Demonstracja ma dwa kroki. Wszystkie branże, dodatki i sceny pozostały w repozytorium.
+  Three.js uruchamia się wyłącznie w demonstracji po włączeniu podglądu lub portretu.
+- Stare kotwice działają: #about (krótkie bio), #capabilities (usługi),
+  #contact (formularz), #configurator (sekcja z odnośnikiem do demonstracji).
+- Nieznane ścieżki zwracają stronę 404 i status HTTP 404 przez serwer Angular/Express.
+  Hosting musi przekazywać te żądania do serwera, bez własnego przekierowania na home.
+
+### Kontakt v2
+
+POST /api/contact, JSON:
+
+```json
+{
+  "version": 2,
+  "name": "",
+  "email": "client@example.com",
+  "message": "Potrzebuję strony.",
+  "website": "",
+  "context": ""
+}
+```
+
+Imię (do 100 znaków) i kontekst (do 500 znaków) są opcjonalne.
+Wymagane: poprawny e-mail (do 254 znaków) i wiadomość (1–2000 znaków, nie same spacje).
+Pole website jest honeypotem. Nie umieszczaj danych osobowych w kontekście demonstracji,
+ponieważ jest przekazywany w URL. Formularz pozwala usunąć kontekst.
+
+Odpowiedzi: 202 {ok:true,status:"accepted"}; 400 {code:"validation_error",fields:{...}};
+429 {code:"rate_limited"} z Retry-After; 503 {code:"not_configured"};
+502 {code:"provider_error"}. Przyjęcie nie potwierdza doręczenia.
+Nieprawidłowy JSON daje 400, przekroczenie 16 KB daje 413.
+Kontrakt bez version lub z version:1 nadal obsługuje dawny formularz (także kontakt telefoniczny).
+Limity: 5 prób / 15 minut / IP oraz 80 wywołań dostawcy / 24 h na proces;
+przy wielu instancjach potrzebny jest wspólny magazyn limitów.
+Zachowano konfigurację trust proxy=1 — infrastruktura powinna mieć jeden zaufany reverse proxy.
+
+### Sprawdzenie lokalne
+
+```sh
+npm run build -- --stats-json
+npm test -- --watch=false
+npm run test:api
+npm run serve:ssr:adamulanowski.dev
+```
+
+Test przeglądarkowy: `node tests/browser-check.mjs` przy uruchomionym serwerze na localhost:4000.
+Wymaga Playwright i Edge. Można wskazać moduł przez PLAYWRIGHT_MODULE,
+inny adres serwera przez TEST_ORIGIN. Test używa atrapy odpowiedzi na wysyłanie wiadomości
+i nie wysyła prawdziwej poczty. Zrzuty i raport trafiają do ignorowanego artifacts/ux-check.
+
+Przed publikacją właściciel powinien potwierdzić opis prywatności względem faktycznych
+dostawców hostingu/poczty, transferów poza EOG i stosowanych okresów przechowywania.
+Repozytorium nie zawiera umów ani konfiguracji retencji tych dostawców.
+Konfigurację Resend i rzeczywiste doręczenie należy sprawdzić na środowisku wdrożenia.
