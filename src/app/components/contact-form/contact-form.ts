@@ -1,4 +1,5 @@
-import { afterNextRender, Component, ElementRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FieldErrors, validateContact } from '../../../shared/contact-validation';
@@ -21,10 +22,9 @@ export class ContactForm {
   private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly route = inject(ActivatedRoute);
   constructor() {
-    // Context is optional, never inserted into the message or required for submission.
-    afterNextRender(() =>
-      this.context.set((this.route.snapshot.queryParamMap.get('context') ?? '').slice(0, 500)),
-    );
+    this.route.queryParamMap.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe((params) => {
+      this.context.set((params.get('context') ?? '').slice(0, 500));
+    });
   }
   clearError(field: keyof FieldErrors) {
     this.errors.update((errors) => ({ ...errors, [field]: undefined }));

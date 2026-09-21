@@ -1,23 +1,61 @@
 <main id="main" tabindex="-1">
   <section class="hero container" aria-labelledby="hero-title">
-    <p class="eyebrow">Adam Ułanowski / rozwiązania dla firm</p>
-    <h1 id="hero-title">Strony, aplikacje i automatyzacje dla Twojej firmy</h1>
-    <p class="hero-description">
-      Tworzę strony internetowe i aplikacje webowe. Automatyzuję powtarzalne zadania i łączę AI z
-      narzędziami, których już używasz. Opowiedz, czego potrzebujesz — pomogę dobrać rozwiązanie.
-    </p>
-    <div class="actions">
-      <a class="button primary" href="#contact">Porozmawiajmy o projekcie</a
-      ><a class="button" href="#uslugi">Zobacz, w czym mogę pomóc</a>
+    <div class="hero-copy">
+      <p class="eyebrow">Adam Ułanowski / rozwiązania dla firm</p>
+      <h1 id="hero-title">Więcej klientów.<br />Mniej ręcznej pracy.</h1>
+      <p class="hero-description">
+        Buduję strony, aplikacje i automatyzacje, które pomagają zdobywać klientów i oszczędzać
+        czas.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="#contact">Opowiedz, co chcesz usprawnić</a>
+      </div>
     </div>
-    <p class="hero-note">Nie musisz znać technologii ani mieć gotowej specyfikacji.</p>
-    <div class="hero-bottom" aria-hidden="true">
-      <span>Od pomysłu do działającego rozwiązania</span><span>Przewiń i poznaj możliwości ↓</span>
+    <section id="configurator" class="configurator-section" aria-labelledby="configurator-title">
+      <h2 id="configurator-title">Zobacz. Poklikaj. Wyobraź sobie swoje.</h2>
+      <p class="section-intro">Zmieniaj sceny i dodawaj funkcje — tak może działać Twoja strona.</p>
+      <app-experience-hero class="hero-configurator" />
+    </section>
+  </section>
+  <section id="realizacje" class="work-section" aria-labelledby="work-title">
+    <div class="container">
+      <p class="eyebrow">02 / Wybrane realizacje</p>
+      <div class="section-heading">
+        <h2 id="work-title">Rzeczywiste firmy.<br />Działające strony.</h2>
+        <p>
+          Trzy różne branże i trzy sposoby na przedstawienie oferty. Zobacz strony, które
+          stworzyłem.
+        </p>
+      </div>
+      <div class="work-grid">
+        @for (project of projects; track project.slug) {
+          <article class="work-card">
+            <a
+              [routerLink]="['/realizacje', project.slug]"
+              [attr.aria-label]="'Poznaj realizację: ' + project.name"
+            >
+              <img
+                [src]="project.image"
+                [alt]="'Zrzut strony ' + project.name"
+                width="1440"
+                height="1000"
+                loading="lazy"
+              />
+            </a>
+            <div class="work-copy">
+              <p class="work-category">{{ project.category }}</p>
+              <h3>{{ project.name }}</h3>
+              <p>{{ project.teaser }}</p>
+              <a [routerLink]="['/realizacje', project.slug]">Zobacz realizację →</a>
+            </div>
+          </article>
+        }
+      </div>
     </div>
   </section>
   <section id="uslugi" class="section container" aria-labelledby="services-title">
     <span id="capabilities"></span>
-    <p class="eyebrow">01 / W czym mogę pomóc</p>
+    <p class="eyebrow">03 / W czym mogę pomóc</p>
     <div class="section-heading">
       <h2 id="services-title">Cztery usługi.<br />Twoja konkretna potrzeba.</h2>
       <p>
@@ -31,55 +69,21 @@
             <span>0{{ i + 1 }}</span
             ><span class="service-icon" aria-hidden="true">{{ service.icon }}</span>
           </div>
-          <h3>{{ service.title }}</h3>
+          <h3>
+            <a [routerLink]="service.path">{{ service.title }}</a>
+          </h3>
           <p class="need">{{ service.need }}</p>
           <p>{{ service.solution }}</p>
           <p class="examples"><span>Przykłady</span>{{ service.examples }}</p>
+          <a class="service-link" [routerLink]="service.path"
+            >Poznaj zakres i odpowiedzi na pytania →</a
+          >
         </article>
       }
     </div>
   </section>
-  <section id="configurator" class="section container" aria-labelledby="example-title">
-    <p class="eyebrow">02 / Przykład działania</p>
-    <div class="example-grid">
-      <div>
-        <h2 id="example-title">Od wyboru klienta<br />do uporządkowanego zapytania.</h2>
-        <p>
-          Konfigurator pomaga wybrać potrzebne funkcje i zobaczyć, jak mogą ze sobą współpracować.
-          To demonstracja możliwości, którą możesz sprawdzić bez podawania danych.
-        </p>
-        <a class="button" routerLink="/demo/konfigurator"
-          >Wypróbuj konfigurator <span aria-hidden="true">↗</span></a
-        >
-        <p class="small">Dwa kroki · przykładowe branże · opcjonalny podgląd 3D</p>
-      </div>
-      <ol class="example-flow" aria-label="Przykładowy przebieg">
-        <li>
-          <span>01</span>
-          <div>
-            <strong>Klient wybiera</strong>
-            <p>Usługi i funkcje, których potrzebuje</p>
-          </div>
-        </li>
-        <li>
-          <span>02</span>
-          <div>
-            <strong>Widzi swoją koncepcję</strong>
-            <p>Rozwiązania zebrane w jednym miejscu</p>
-          </div>
-        </li>
-        <li>
-          <span>03</span>
-          <div>
-            <strong>Rozpoczyna rozmowę</strong>
-            <p>Przechodzi do prostego formularza</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-  </section>
   <section class="section container" aria-labelledby="process-title">
-    <p class="eyebrow">03 / Jak pracuję</p>
+    <p class="eyebrow">04 / Jak pracuję</p>
     <h2 id="process-title">Zaczynamy od rozmowy.</h2>
     <ol class="process-grid">
       <li>
@@ -110,7 +114,7 @@
       loading="lazy"
     />
     <div>
-      <p class="eyebrow">04 / Osoba za projektem</p>
+      <p class="eyebrow">05 / Osoba za projektem</p>
       <h2 id="about-title">Cześć, jestem Adam.</h2>
       <p>
         Tworzę strony i aplikacje — od interfejsu po połączenia z innymi systemami. Lubię
@@ -122,7 +126,7 @@
   </section>
   <section id="contact" class="section container contact-grid" aria-labelledby="contact-title">
     <div>
-      <p class="eyebrow">05 / Kontakt</p>
+      <p class="eyebrow">06 / Kontakt</p>
       <h2 id="contact-title">Opowiedz,<br />czego potrzebujesz.</h2>
       <p>
         Wystarczy kilka zdań o pomyśle lub problemie. Nie musisz jeszcze wiedzieć, jakie rozwiązanie

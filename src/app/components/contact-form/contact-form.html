@@ -2,7 +2,7 @@
   <p class="hint" id="contact-required">E-mail i wiadomość są wymagane. Imię jest opcjonalne.</p>
   @if (context()) {
     <div class="context">
-      <p>Kontekst z demonstracji: {{ context() }}</p>
+      <p>Wybrane rozwiązanie: {{ context() }}</p>
       <button
         type="button"
         (click)="context.set('')"

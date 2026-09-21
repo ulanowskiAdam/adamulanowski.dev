@@ -10,7 +10,8 @@ import { RouterLink } from '@angular/router';
         >A<span>.</span></a
       >
       <nav aria-label="Główna nawigacja">
-        <a routerLink="/" fragment="uslugi">Usługi</a><a routerLink="/o-mnie">O mnie</a
+        <a routerLink="/" fragment="uslugi">Usługi</a
+        ><a routerLink="/" fragment="realizacje">Realizacje</a><a routerLink="/o-mnie">O mnie</a
         ><a class="contact-link" routerLink="/" fragment="contact"
           >Porozmawiajmy <span aria-hidden="true">↗</span></a
         >
@@ -52,10 +53,12 @@ import { RouterLink } from '@angular/router';
         min-height: 76px;
       }
       nav {
-        gap: 16px;
+        gap: 0 12px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
       nav a {
-        font-size: 16px;
+        font-size: 13px;
       }
       .contact-link span {
         display: none;
@@ -73,7 +76,7 @@ export class SiteHeader {}
     <nav aria-label="Linki w stopce">
       <a routerLink="/polityka-prywatnosci">Polityka prywatności</a
       ><a href="https://github.com/ulanowskiAdam">GitHub ↗</a
-      ><a routerLink="/demo/konfigurator">Demo</a>
+      ><a routerLink="/" fragment="configurator">Interaktywne demo</a>
     </nav>
   </footer>`,
   styles: `

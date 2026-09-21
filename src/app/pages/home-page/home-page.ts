@@ -1,16 +1,20 @@
+import { projects } from '../../content/projects';
+import { ExperienceHero } from '../../components/experience-hero/experience-hero';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ContactForm } from '../../components/contact-form/contact-form';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, ContactForm],
+  imports: [RouterLink, ContactForm, ExperienceHero],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
 })
 export class HomePage {
+  readonly projects = projects;
   readonly services = [
     {
+      path: '/strony-internetowe-dla-firm',
       title: 'Strony internetowe',
       need: 'Chcesz, żeby klient od razu rozumiał Twoją ofertę i wiedział, jak się odezwać.',
       solution:
@@ -19,6 +23,7 @@ export class HomePage {
       icon: '↗',
     },
     {
+      path: '/aplikacje-webowe',
       title: 'Aplikacje webowe',
       need: 'Arkusze i gotowe narzędzia przestają wystarczać do codziennej pracy.',
       solution:
@@ -27,6 +32,7 @@ export class HomePage {
       icon: '⊞',
     },
     {
+      path: '/automatyzacja-procesow',
       title: 'Automatyzacje procesów',
       need: 'Kopiujesz dane, pilnujesz terminów i powtarzasz te same czynności.',
       solution:
@@ -35,6 +41,7 @@ export class HomePage {
       icon: '⇄',
     },
     {
+      path: '/integracje-ai',
       title: 'Integracje AI',
       need: 'Chcesz szybciej pracować z dokumentami i odpowiadać na powtarzające się pytania.',
       solution:

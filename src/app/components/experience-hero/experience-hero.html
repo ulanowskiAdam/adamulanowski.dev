@@ -1,124 +1,64 @@
-<main id="main" class="container demo" tabindex="-1">
-  <p class="eyebrow">Opcjonalna demonstracja</p>
-  <h1>Sprawdź pomysł na usprawnienie.</h1>
-  <p class="intro">
-    Wybierz przykładową branżę i potrzebne funkcje. Dwa kroki, bez danych kontaktowych. To
-    inspiracja — rozwiązania tworzę także dla innych branż.
-  </p>
-  @let step = store.step();
-  @if (step === 0) {
-    <button type="button" class="button primary" (click)="start()">Uruchom demonstrację</button>
-  } @else {
-    <p class="progress" role="status">
-      Krok {{ step }} z 2:
-      {{ step === 1 ? 'przykładowa branża' : 'wybór rozwiązań i podsumowanie' }}
-    </p>
-    <div class="demo-layout">
-      <div>
-        @if (step === 1) {
-          <fieldset>
-            <legend #stepTitle tabindex="-1">Wybierz przykładową branżę</legend>
-            <div class="options">
-              @for (item of store.industries; track item.id) {
-                <button
-                  class="option"
-                  type="button"
-                  [attr.aria-pressed]="store.industryId() === item.id"
-                  (click)="selectIndustry(item.id)"
-                >
-                  <span aria-hidden="true"><ng-container *ngComponentOutlet="item.icon" /></span
-                  >{{ item.label }}
-                </button>
-              }
-            </div>
-          </fieldset>
-          <button
-            class="button primary"
-            type="button"
-            [disabled]="!store.industryId()"
-            (click)="next()"
-          >
-            Dalej: wybierz rozwiązania →
-          </button>
-        } @else {
-          <fieldset>
-            <legend #stepTitle tabindex="-1">Co warto usprawnić?</legend>
-            <p class="muted">Możesz wybrać kilka funkcji.</p>
-            <div class="options">
-              @for (item of store.addons(); track item.id) {
-                <button
-                  class="option"
-                  type="button"
-                  [attr.aria-pressed]="store.selectedAddonIds().has(item.id)"
-                  (click)="toggleAddon(item.id)"
-                >
-                  <span aria-hidden="true"><ng-container *ngComponentOutlet="item.icon" /></span
-                  ><span
-                    ><strong>{{ item.label }}</strong
-                    ><small>{{ item.description }}</small></span
-                  >
-                </button>
-              }
-            </div>
-          </fieldset>
-          <section class="summary" aria-labelledby="summary-title">
-            <h2 id="summary-title">Twoja koncepcja</h2>
-            <p>{{ store.industry()?.label }}</p>
-            <ul>
-              @for (item of store.selectedAddons(); track item.id) {
-                <li>{{ item.label }}</li>
-              } @empty {
-                <li>Wybierz funkcje powyżej, aby uzupełnić koncepcję.</li>
-              }
-            </ul>
-            <a
-              class="button primary"
-              routerLink="/"
-              fragment="contact"
-              [queryParams]="{ context: context }"
-              >Porozmawiajmy o tej koncepcji ↗</a
-            >
-          </section>
-          <div class="actions">
-            <button class="button" type="button" (click)="back()">← Zmień branżę</button
-            ><button class="button" type="button" (click)="restart()">Zacznij od nowa</button>
-          </div>
-        }
-      </div>
-      <aside aria-label="Podgląd koncepcji">
+<div class="demo-playground">
+  <div class="industry-options" role="group" aria-label="Zmień przykładową scenę">
+    @for (item of store.industries; track item.id) {
+      <button
+        type="button"
+        class="industry-button"
+        [attr.aria-label]="item.label"
+        [attr.aria-pressed]="store.industryId() === item.id"
+        (click)="selectIndustry(item.id)"
+      >
+        <span aria-hidden="true"><ng-container *ngComponentOutlet="item.icon" /></span>
+        {{ labels[item.id] }}
+      </button>
+    }
+  </div>
+  <figure class="live-preview" aria-label="Interaktywna scena 3D">
+    <div id="concept-visual" class="visual">
+      <app-business-scene [industry]="store.industryId()" [step]="1" />
+    </div>
+    <figcaption aria-live="polite">{{ store.industry()?.sceneLabel }}</figcaption>
+  </figure>
+  <div class="demo-contact actions">
+    <a
+      class="button primary"
+      routerLink="/"
+      fragment="contact"
+      [queryParams]="context ? { context: context } : {}"
+      >Porozmawiajmy o Twoim pomyśle ↗</a
+    >
+    <a class="email-link" href="mailto:aulanowski98@gmail.com">Napisz e-mail</a>
+  </div>
+  <fieldset class="addon-controls">
+    <legend>Dodawaj funkcje i sprawdzaj możliwości</legend>
+    <div class="addon-options">
+      @for (item of store.addons(); track item.id) {
         <button
-          class="button"
           type="button"
-          (click)="showVisual = !showVisual"
-          [attr.aria-pressed]="showVisual"
+          class="option"
+          [attr.aria-pressed]="store.selectedAddonIds().has(item.id)"
+          (click)="toggleAddon(item.id)"
+          [attr.aria-label]="item.label"
+          [title]="item.description"
         >
-          {{ showVisual ? 'Ukryj podgląd 3D' : 'Włącz podgląd 3D' }}
+          <span aria-hidden="true">{{ store.selectedAddonIds().has(item.id) ? '✓' : '+' }}</span
+          >{{ item.shortLabel }}
         </button>
-        @if (showVisual) {
-          <div class="visual">
-            <app-business-scene [industry]="store.industryId()" [step]="step" />
-          </div>
-          <app-selected-addons
-            [addons]="store.selectedAddons()"
-            [activeId]="store.activeAddonId()"
-          />
-        }
-        <p class="visual-note">
-          Podgląd jest dodatkiem. Wybór i podsumowanie działają również bez WebGL. Przy ograniczeniu
-          ruchu scena pozostaje statyczna.
+      }
+    </div>
+  </fieldset>
+  @if (store.selectedAddons().length) {
+    <div class="selected-features" aria-live="polite">
+      <app-selected-addons [addons]="store.selectedAddons()" [activeId]="store.activeAddonId()" />
+      @for (item of store.selectedAddons(); track item.id) {
+        <p>
+          <strong>{{ item.shortLabel }}:</strong> {{ item.description }}
         </p>
-      </aside>
+      }
     </div>
   }
-  <p class="direct">
-    <a routerLink="/" fragment="contact">Przejdź do kontaktu bez demonstracji ↗</a>
-  </p>
-  <details>
-    <summary>Jeszcze jeden przykład: interaktywny portret</summary>
-    @defer (on interaction) {
-      <div class="portrait"><app-about-portrait /></div>
-    } @placeholder {
-      <button class="button" type="button">Pokaż portret 3D</button>
-    }
-  </details>
-</main>
+  <div class="demo-footer">
+    <p>To przykład możliwości. Twoje rozwiązanie stworzymy po swojemu.</p>
+    <button type="button" (click)="restart()">Resetuj demo</button>
+  </div>
+</div>

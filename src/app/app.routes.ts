@@ -1,5 +1,19 @@
+import { services } from './content/services';
+import { projects } from './content/projects';
 import { Routes } from '@angular/router';
 export const routes: Routes = [
+  ...services.map((service) => ({
+    path: service.slug,
+    loadComponent: () => import('./pages/service-page').then((m) => m.ServicePage),
+    title: service.title + ' — Adam Ułanowski',
+    data: { description: service.description, service },
+  })),
+  ...projects.map((project) => ({
+    path: 'realizacje/' + project.slug,
+    loadComponent: () => import('./pages/project-page').then((m) => m.ProjectPage),
+    title: project.name + ' — realizacja strony | Adam Ułanowski',
+    data: { description: project.teaser, project },
+  })),
   {
     path: '',
     loadComponent: () => import('./pages/home-page/home-page').then((m) => m.HomePage),
@@ -29,12 +43,12 @@ export const routes: Routes = [
   },
   {
     path: 'demo/konfigurator',
-    loadComponent: () =>
-      import('./components/experience-hero/experience-hero').then((m) => m.ExperienceHero),
-    title: 'Demo konfiguratora — Adam Ułanowski',
+    loadComponent: () => import('./pages/configurator-page').then((m) => m.ConfiguratorPage),
+    title: 'Interaktywne demo — Adam Ułanowski',
     data: {
+      noindex: true,
       description:
-        'Wypróbuj konfigurator rozwiązań dla firm. Dwa kroki, bez danych kontaktowych, z opcjonalnym podglądem 3D.',
+        'Pobaw się interaktywnym demo 3D: zmieniaj branże i dodawaj funkcje. Zobacz możliwości i porozmawiajmy o Twoim pomyśle.',
     },
   },
   {

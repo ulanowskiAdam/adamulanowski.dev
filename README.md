@@ -143,11 +143,23 @@ For more information on using the Angular CLI, including detailed command refere
 
 ## Refaktoryzacja oferty i kontaktu
 
-- Strona główna i podstrony /o-mnie, /polityka-prywatnosci, /demo/konfigurator są prerenderowane.
-- Demonstracja ma dwa kroki. Wszystkie branże, dodatki i sceny pozostały w repozytorium.
-  Three.js uruchamia się wyłącznie w demonstracji po włączeniu podglądu lub portretu.
-- Stare kotwice działają: #about (krótkie bio), #capabilities (usługi),
-  #contact (formularz), #configurator (sekcja z odnośnikiem do demonstracji).
+- Strona główna, cztery strony usług, trzy realizacje oraz strony o mnie, prywatności
+  i zgodnościowy adres /demo/konfigurator są prerenderowane (łącznie 11 tras).
+- Konfigurator to otwarte demo do zabawy: wybór sceny i dodatków bez ankiety lub kroków.
+  Kontakt jest zawsze dostępny, także bez interakcji z demo. Wybrane inspiracje można
+  przekazać do formularza bez utraty wpisanej wiadomości.
+- Scena 3D jest widoczna od razu w pierwszym ekranie, bez przycisku uruchamiania.
+  Three.js ładuje się automatycznie po renderowaniu strony; scenę aktualizuje wybór branży.
+  Portret 3D pozostał wyłącznie jako niewykorzystywany kod eksperymentalny, poza publiczną ścieżką.
+- /demo/konfigurator pozostaje dla starych linków z noindex. Sitemap zawiera ofertę,
+  realizacje i stronę o mnie; pomija demo i prywatność.
+- Stare kotwice działają: #about, #capabilities, #contact, #configurator.
+  Nowa sekcja realizacji ma kotwicę #realizacje.
+- Treść usług i realizacji znajduje się w src/app/content. Autor potwierdził trzy realizacje:
+  Lifting Paulina Karol, Fizjomind i Kontent Architektura. Opisy dotyczą widocznych funkcji,
+  bez deklaracji wzrostu sprzedaży lub wyników bez pomiarów. Zrzuty wykonano 21.09.2026.
+- Grafika udostępniania: public/images/offer-social.png (1200×630), edytowalne źródło SVG obok.
+  Dane strukturalne zawierają dane kontaktowe, logo i adresy usług; nie dodano adresu siedziby.
 - Nieznane ścieżki zwracają stronę 404 i status HTTP 404 przez serwer Angular/Express.
   Hosting musi przekazywać te żądania do serwera, bez własnego przekierowania na home.
 
@@ -168,7 +180,7 @@ POST /api/contact, JSON:
 
 Imię (do 100 znaków) i kontekst (do 500 znaków) są opcjonalne.
 Wymagane: poprawny e-mail (do 254 znaków) i wiadomość (1–2000 znaków, nie same spacje).
-Pole website jest honeypotem. Nie umieszczaj danych osobowych w kontekście demonstracji,
+Pole website jest honeypotem. Nie umieszczaj danych osobowych w kontekście konfiguratora,
 ponieważ jest przekazywany w URL. Formularz pozwala usunąć kontekst.
 
 Odpowiedzi: 202 {ok:true,status:"accepted"}; 400 {code:"validation_error",fields:{...}};

@@ -131,23 +131,27 @@ describe('hero configurator', () => {
     disposeGroup(group);
   });
 
-  it('completes two steps without contact data and preserves the selected context', () => {
+  it('shows an example immediately without requiring input before contact', () => {
     const hero = TestBed.runInInjectionContext(() => new ExperienceHero());
-    hero.start();
-    hero.next();
-    expect(hero.store.step()).toBe(1);
+    expect(hero.store.industryId()).toBe('gastronomia');
+    expect(hero.store.addons()).toHaveLength(4);
+    expect(hero.context).toBe('');
     hero.selectIndustry('fachowcy');
-    hero.next();
-    expect(hero.store.step()).toBe(2);
     hero.toggleAddon('fachowcy-obsluga-zlecen');
-    hero.next();
-    expect(hero.store.step()).toBe(2);
+    expect(hero.context).toContain('Inspiracja z demo');
     expect(hero.context).toContain('Automatyzacja obsługi zleceń');
-    hero.back();
-    expect(hero.store.step()).toBe(1);
     hero.restart();
-    expect(hero.store.step()).toBe(0);
-    expect(hero.store.industryId()).toBeNull();
+    expect(hero.store.industryId()).toBe('gastronomia');
     expect(hero.store.selectedAddonIds().size).toBe(0);
+    expect(hero.context).toBe('');
+  });
+
+  it('switches scenes freely and clears incompatible selected features', () => {
+    const hero = TestBed.runInInjectionContext(() => new ExperienceHero());
+    hero.toggleAddon('gastronomia-rezerwacje');
+    hero.selectIndustry('wizyty');
+    expect(hero.store.selectedAddons()).toHaveLength(0);
+    expect(hero.store.addons()[0].id).toBe('wizyty-rezerwacje');
+    expect(hero.context).not.toContain('System rezerwacji stolików');
   });
 });
