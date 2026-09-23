@@ -2,12 +2,13 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { IndustryId } from './configurator.store';
 import { buildCoreScene, INDUSTRY_SCENE_BUILDERS } from './industry-scenes';
+import { CAMERA_PRESETS, damp, INDUSTRY_ROTATIONS } from './scene-layout';
 import {
-  CAMERA_PRESETS,
-  damp,
-  INDUSTRY_ROTATIONS,
-} from './scene-layout';
-import { batchStaticMeshes, disposeGroup, ScenePrimitives, setGroupOpacity } from './scene-primitives';
+  batchStaticMeshes,
+  disposeGroup,
+  ScenePrimitives,
+  setGroupOpacity,
+} from './scene-primitives';
 import { IndustryRuntime, SceneFrame } from './scene-types';
 
 interface TransitioningIndustry extends IndustryRuntime {
@@ -48,6 +49,18 @@ export class BusinessSceneRuntime {
   private mobileMode = false;
   private narrowPanel = false;
   private pointerEnabled = false;
+  private dragPointer: number | null = null;
+  private dragX = 0;
+  private touchRotation = 0;
+  private readonly pointerDown = (event: PointerEvent): void => {
+    if (event.pointerType === 'mouse' || this.dragPointer !== null) return;
+    this.dragPointer = event.pointerId;
+    this.dragX = event.clientX;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+  };
+  private readonly pointerUp = (event: PointerEvent): void => {
+    if (event.pointerId === this.dragPointer) this.dragPointer = null;
+  };
   private readonly pointer = new THREE.Vector2();
   private readonly pointerTarget = new THREE.Vector2();
   private readonly lookTarget = new THREE.Vector3(0, -0.08, 0);
@@ -57,6 +70,13 @@ export class BusinessSceneRuntime {
   private readonly mockups = new Map<IndustryId | null, IndustryRuntime>();
 
   private readonly pointerMove = (event: PointerEvent): void => {
+    if (event.pointerId === this.dragPointer) {
+      this.touchRotation += (event.clientX - this.dragX) * 0.008;
+      this.dragX = event.clientX;
+      this.markMoving(180);
+      this.invalidate();
+      return;
+    }
     if (!this.pointerEnabled) return;
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     this.pointerTarget.set(
@@ -98,8 +118,7 @@ export class BusinessSceneRuntime {
     // Paint the already prepared group inside the click handler. Waiting for
     // the next animation frame leaves the previous mock-up visible for one
     // extra browser paint while the labels have already changed.
-    if (this.renderer && this.scene && this.camera)
-      this.renderer.render(this.scene, this.camera);
+    if (this.renderer && this.scene && this.camera) this.renderer.render(this.scene, this.camera);
     this.invalidate();
   }
 
@@ -112,6 +131,10 @@ export class BusinessSceneRuntime {
     const host = this.host?.nativeElement;
     host?.removeEventListener('pointermove', this.pointerMove);
     host?.removeEventListener('pointerleave', this.pointerLeave);
+    host?.removeEventListener('pointerdown', this.pointerDown);
+    host?.removeEventListener('pointerup', this.pointerUp);
+    host?.removeEventListener('pointercancel', this.pointerUp);
+    host?.removeEventListener('lostpointercapture', this.pointerUp);
     this.mockups.forEach((mockup) => mockup.group.removeFromParent());
     if (this.scene) disposeGroup(this.scene);
     this.mockups.forEach((mockup) => disposeGroup(mockup.group));
@@ -137,6 +160,10 @@ export class BusinessSceneRuntime {
     this.pointerEnabled = matchMedia('(pointer: fine)').matches;
     host.addEventListener('pointermove', this.pointerMove);
     host.addEventListener('pointerleave', this.pointerLeave);
+    host.addEventListener('pointerdown', this.pointerDown);
+    host.addEventListener('pointerup', this.pointerUp);
+    host.addEventListener('pointercancel', this.pointerUp);
+    host.addEventListener('lostpointercapture', this.pointerUp);
 
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.FogExp2(0x090c0a, 0.052);
@@ -152,9 +179,7 @@ export class BusinessSceneRuntime {
     this.renderer.setClearColor(0x000000, 0);
     const deviceRatio = Math.max(1, window.devicePixelRatio || 1);
     this.sharpPixelRatio = Math.min(deviceRatio, this.mobileMode ? 1.5 : 1.75);
-    this.motionPixelRatio = this.mobileMode
-      ? Math.min(deviceRatio, 1.1)
-      : this.sharpPixelRatio;
+    this.motionPixelRatio = this.mobileMode ? Math.min(deviceRatio, 1.1) : this.sharpPixelRatio;
     this.currentPixelRatio = this.mobileMode ? this.motionPixelRatio : this.sharpPixelRatio;
     this.renderer.setPixelRatio(this.currentPixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -397,10 +422,7 @@ export class BusinessSceneRuntime {
     // Fit both axes. A wide foldable viewport can otherwise crop the top and
     // bottom while a narrow one pushes the model too far away.
     const halfFov = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
-    const requiredDistance = Math.max(
-      2.8 / (halfFov * this.camera.aspect),
-      2.4 / halfFov,
-    );
+    const requiredDistance = Math.max(2.8 / (halfFov * this.camera.aspect), 2.4 / halfFov);
     const distance = Math.max(0, requiredDistance - preset.position[2]);
     const narrowScale = 1;
     const parallaxX =
@@ -437,17 +459,19 @@ export class BusinessSceneRuntime {
         : this.currentIndustry
           ? INDUSTRY_ROTATIONS[this.currentIndustry]
           : 0;
+    const mobileSway = this.mobileMode && !this.reducedMotion && this.dragPointer === null
+      ? Math.sin(frame.time * 0.45) * 0.16 : 0;
     this.world.rotation.y = this.reducedMotion
-      ? preset.worldRotation + industryRotation
+      ? preset.worldRotation + industryRotation + this.touchRotation
       : damp(
           this.world.rotation.y,
-          preset.worldRotation + industryRotation,
+          preset.worldRotation + industryRotation + parallaxX * 0.8 + this.touchRotation + mobileSway,
           this.reducedMotion ? 100 : 4.5,
           frame.delta,
         );
     this.world.rotation.x = this.reducedMotion
       ? -0.08
-      : damp(this.world.rotation.x, -0.08, this.reducedMotion ? 100 : 5, frame.delta);
+      : damp(this.world.rotation.x, -0.08 + parallaxY, 5, frame.delta);
     const scale = this.reducedMotion
       ? preset.worldScale * narrowScale
       : damp(

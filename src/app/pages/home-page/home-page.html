@@ -1,5 +1,23 @@
 <main id="main" tabindex="-1">
   <section class="hero container" aria-labelledby="hero-title">
+    <nav id="configurator" class="hero-industries" aria-label="Otwórz konfigurator dla swojej branży">
+      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'gastronomia' }"
+        >Gastronomia <span aria-hidden="true">↗</span></a
+      >
+      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'wizyty' }"
+        >Wizyty <span aria-hidden="true">↗</span></a
+      >
+      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'fachowcy' }"
+        >Usługi <span aria-hidden="true">↗</span></a
+      >
+    </nav>
+    <div
+      class="hero-stage"
+      role="img"
+      aria-label="Przestrzenna makieta restauracji reagująca na ruch myszy i przesunięcie palcem"
+    >
+      <app-business-scene industry="gastronomia" [step]="1" />
+    </div>
     <div class="hero-copy">
       <p class="eyebrow">Adam Ułanowski / rozwiązania dla firm</p>
       <h1 id="hero-title">Więcej klientów.<br />Mniej ręcznej pracy.</h1>
@@ -8,14 +26,9 @@
         czas.
       </p>
       <div class="actions">
-        <a class="button primary" href="#contact">Opowiedz, co chcesz usprawnić</a>
+        <a class="button primary" href="#contact">Porozmawiajmy o Twoim projekcie ↗</a>
       </div>
     </div>
-    <section id="configurator" class="configurator-section" aria-labelledby="configurator-title">
-      <h2 id="configurator-title">Zobacz. Poklikaj. Wyobraź sobie swoje.</h2>
-      <p class="section-intro">Zmieniaj sceny i dodawaj funkcje — tak może działać Twoja strona.</p>
-      <app-experience-hero class="hero-configurator" />
-    </section>
   </section>
   <section id="realizacje" class="work-section" aria-labelledby="work-title">
     <div class="container">

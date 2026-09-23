@@ -27,7 +27,7 @@ import type { BusinessSceneRuntime } from './business-scene.runtime';
     }
   </div>`,
   styles: [
-    ':host,.canvas-host{position:absolute;inset:0;display:block}.canvas-host canvas{display:block;width:100%;height:100%;filter:saturate(.96) contrast(1.04)}',
+    ':host,.canvas-host{position:absolute;inset:0;display:block}.canvas-host{touch-action:pan-y pinch-zoom}.canvas-host canvas{display:block;width:100%;height:100%;filter:saturate(.96) contrast(1.04)}',
   ],
 })
 export class BusinessScene implements OnDestroy {

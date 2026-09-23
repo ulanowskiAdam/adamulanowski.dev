@@ -6,9 +6,11 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `<a class="skip-link" href="#main">Przejdź do treści</a>
     <header class="container">
-      <a class="brand" routerLink="/" aria-label="Adam Ułanowski — strona główna"
-        >A<span>.</span></a
-      >
+      <div class="brand-links">
+        <a class="brand" routerLink="/" aria-label="Adam Ułanowski — strona główna"
+          >A<span>.</span></a
+        >
+      </div>
       <nav aria-label="Główna nawigacja">
         <a routerLink="/" fragment="uslugi">Usługi</a
         ><a routerLink="/" fragment="realizacje">Realizacje</a><a routerLink="/o-mnie">O mnie</a
@@ -25,6 +27,13 @@ import { RouterLink } from '@angular/router';
       gap: 16px;
       min-height: 88px;
       border-bottom: 1px solid var(--border);
+    }
+    .brand-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex-shrink: 0;
+      padding-block: 8px;
     }
     .brand {
       font-size: 40px;

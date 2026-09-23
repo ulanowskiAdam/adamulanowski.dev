@@ -154,4 +154,25 @@ describe('hero configurator', () => {
     expect(hero.store.addons()[0].id).toBe('wizyty-rezerwacje');
     expect(hero.context).not.toContain('System rezerwacji stolików');
   });
+
+  it('opens the requested industry and allows subsequent choices without reverting them', () => {
+    TestBed.overrideComponent(ExperienceHero, { set: { template: '', imports: [] } });
+    const fixture = TestBed.createComponent(ExperienceHero);
+    fixture.componentRef.setInput('initialIndustry', 'wizyty');
+    fixture.detectChanges();
+    const hero = fixture.componentInstance;
+    expect(hero.store.industryId()).toBe('wizyty');
+    hero.selectIndustry('fachowcy');
+    hero.toggleAddon('fachowcy-obsluga-zlecen');
+    fixture.detectChanges();
+    expect(hero.store.industryId()).toBe('fachowcy');
+    expect(hero.store.selectedAddonIds().has('fachowcy-obsluga-zlecen')).toBe(true);
+    hero.restart();
+    fixture.detectChanges();
+    expect(hero.store.industryId()).toBe('wizyty');
+    expect(hero.store.selectedAddonIds().size).toBe(0);
+    fixture.componentRef.setInput('initialIndustry', 'gastronomia');
+    fixture.detectChanges();
+    expect(hero.store.industryId()).toBe('gastronomia');
+  });
 });
