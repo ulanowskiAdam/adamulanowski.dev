@@ -90,6 +90,53 @@ describe('SSR WebGL isolation', () => {
   });
 });
 
+describe('scene viewport loading', () => {
+  afterEach(() => {
+    TestBed.resetTestingModule();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  function setup() {
+    let intersect!: (entries: { isIntersecting: boolean }[]) => void;
+    const disconnect = vi.fn();
+    vi.stubGlobal('IntersectionObserver', class {
+      constructor(callback: typeof intersect) { intersect = callback; }
+      observe = vi.fn();
+      disconnect = disconnect;
+    });
+    const init = vi.spyOn(BusinessSceneRuntime.prototype, 'init').mockImplementation(() => {});
+    const destroy = vi.spyOn(BusinessSceneRuntime.prototype, 'destroy').mockImplementation(() => {});
+    TestBed.configureTestingModule({ providers: [{ provide: PLATFORM_ID, useValue: 'browser' }] });
+    const fixture = TestBed.createComponent(BusinessScene);
+    fixture.detectChanges();
+    return { fixture, init, destroy, disconnect, intersect: (visible: boolean) =>
+      intersect([{ isIntersecting: visible }]) };
+  }
+
+  it('starts only near the viewport and disposes the loaded scene', async () => {
+    const { fixture, init, destroy, disconnect, intersect } = setup();
+    await fixture.whenStable();
+    intersect(false);
+    expect(init).not.toHaveBeenCalled();
+    intersect(true);
+    await vi.waitFor(() => expect(init).toHaveBeenCalledTimes(1));
+    expect(disconnect).toHaveBeenCalledTimes(1);
+    fixture.destroy();
+    expect(destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels startup when destroyed before entering the viewport', async () => {
+    const { fixture, init, disconnect, intersect } = setup();
+    await fixture.whenStable();
+    fixture.destroy();
+    intersect(true);
+    await Promise.resolve();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+    expect(init).not.toHaveBeenCalled();
+  });
+});
+
 describe('scene frame scheduling', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -162,6 +209,17 @@ describe('scene frame scheduling', () => {
     expect(state.mockups.size).toBe(4);
     expect(state.industries).toHaveLength(1);
     expect(state.industries[0].group).toBe(gastronomy.group);
+    runtime.destroy();
+  });
+
+  it('builds only the requested mock-up when prewarming is skipped', () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.swapIndustry('gastronomia');
+    const first = state.industries[0].group;
+    state.swapIndustry('gastronomia');
+    expect([...state.mockups.keys()]).toEqual(['gastronomia']);
+    expect(state.industries[0].group).toBe(first);
     runtime.destroy();
   });
 

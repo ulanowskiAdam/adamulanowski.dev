@@ -89,6 +89,18 @@ verification before switching NPM, and draining the old instance before stopping
 
 ## Development server
 
+### Pomiar Lighthouse
+
+Uruchom `npm run preview` i otwórz `http://localhost:4000` w profilu Chrome bez
+rozszerzeń. Ta komenda buduje i uruchamia wersję produkcyjną z SSR, minifikacją
+i tree shakingiem. `npm start` na porcie 4200 służy do pracy nad kodem i nie jest
+miarodajny dla pomiaru wydajności produkcji. Mierz osobno wejście na `/` i wejście
+z `#contact`, zachowując ten sam profil urządzenia i ustawienia Lighthouse.
+
+Scena 3D ładuje się przy zbliżeniu do widocznego obszaru. Strona główna tworzy tylko
+używaną makietę restauracji; konfigurator nadal przygotowuje pozostałe branże na
+desktopie. Parametry jakości renderowania i pliki grafik pozostają bez zmian.
+
 To start a local development server, run:
 
 ```bash

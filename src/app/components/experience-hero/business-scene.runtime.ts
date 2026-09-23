@@ -101,6 +101,7 @@ export class BusinessSceneRuntime {
     private readonly state: {
       industry: () => IndustryId | null;
       step: () => number;
+      prewarmIndustries?: () => boolean;
     },
   ) {}
 
@@ -215,7 +216,7 @@ export class BusinessSceneRuntime {
     this.world.add(this.platform);
     this.buildPlatform(this.platform);
     this.buildLighting();
-    if (!this.mobileMode) this.prepareMockups();
+    if (!this.mobileMode && (this.state.prewarmIndustries?.() ?? true)) this.prepareMockups();
 
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(host);

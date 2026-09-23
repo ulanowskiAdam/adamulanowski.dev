@@ -36,10 +36,12 @@ export class BusinessScene implements OnDestroy {
   @ViewChild('sceneCanvas') sceneCanvas?: ElementRef<HTMLCanvasElement>;
   readonly industry = input<IndustryId | null>(null);
   readonly step = input(0);
+  readonly prewarmIndustries = input(true);
 
   private readonly zone = inject(NgZone);
   private runtime?: BusinessSceneRuntime;
   private destroyed = false;
+  private loadObserver?: IntersectionObserver;
 
   constructor() {
     const browser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -51,25 +53,40 @@ export class BusinessScene implements OnDestroy {
     afterNextRender(() => {
       if (!browser || this.destroyed) return;
       this.zone.runOutsideAngular(() => {
-        void import('./business-scene.runtime')
-          .then(({ BusinessSceneRuntime }) => {
-            if (this.destroyed || !this.host || !this.sceneCanvas) return;
-            this.zone.runOutsideAngular(() => {
-              this.runtime = new BusinessSceneRuntime(this.host!, this.sceneCanvas!, this);
-              this.runtime.init();
-            });
-          })
-          .catch(() => {
-            this.runtime?.destroy();
-            this.runtime = undefined;
-            if (!this.destroyed) this.zone.run(() => this.unavailable.set(true));
-          });
+        // A direct #contact visit should not download or initialize an offscreen scene.
+        this.loadObserver = new IntersectionObserver(
+          ([entry]) => {
+            if (!entry.isIntersecting || this.destroyed || !this.loadObserver) return;
+            this.loadObserver?.disconnect();
+            this.loadObserver = undefined;
+            this.load();
+          },
+          { rootMargin: '200px' },
+        );
+        this.loadObserver.observe(this.host!.nativeElement);
       });
     });
   }
 
+  private load(): void {
+    void import('./business-scene.runtime')
+      .then(({ BusinessSceneRuntime }) => {
+        if (this.destroyed || !this.host || !this.sceneCanvas) return;
+        this.zone.runOutsideAngular(() => {
+          this.runtime = new BusinessSceneRuntime(this.host!, this.sceneCanvas!, this);
+          this.runtime.init();
+        });
+      })
+      .catch(() => {
+        this.runtime?.destroy();
+        this.runtime = undefined;
+        if (!this.destroyed) this.zone.run(() => this.unavailable.set(true));
+      });
+  }
+
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.loadObserver?.disconnect();
     this.zone.runOutsideAngular(() => this.runtime?.destroy());
     this.runtime = undefined;
   }
