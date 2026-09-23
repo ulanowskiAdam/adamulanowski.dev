@@ -43,6 +43,12 @@ import { Component } from '@angular/core';
     </p>
     <h2>Demonstracja i pliki cookies</h2>
     <p>
+      Opcjonalna odpowiedź „Skąd o mnie wiesz?” trafia do wiadomości kontaktowej.
+      Do oceny źródeł zapytań serwer zapisuje także datę przyjęcia wiadomości przez usługę
+      wysyłki i wybraną kategorię źródła. Ten wpis statystyczny nie zawiera treści wiadomości,
+      adresu e-mail ani adresu IP i nie wymaga zapisywania cookies w przeglądarce.
+    </p>
+    <p>
       Wybory w konfiguratorze pozostają w pamięci strony. Jeśli przejdziesz do kontaktu z
       kontekstem, wybrane opcje znajdą się w adresie strony i zostaną wysłane dopiero z formularzem.
       Możesz usunąć kontekst przed wysłaniem. Aplikacja nie zapisuje marketingowych plików cookies

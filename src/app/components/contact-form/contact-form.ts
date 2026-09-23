@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FieldErrors, validateContact } from '../../../shared/contact-validation';
+import { contactSources } from '../../../shared/contact-sources';
 
 @Component({
   selector: 'app-contact-form',
@@ -15,6 +16,8 @@ export class ContactForm {
   email = '';
   message = '';
   website = '';
+  source = '';
+  readonly sources = contactSources;
   readonly context = signal('');
   readonly errors = signal<FieldErrors>({});
   readonly state = signal<'idle' | 'sending' | 'accepted' | 'error'>('idle');
@@ -59,6 +62,7 @@ export class ContactForm {
           message: this.message,
           website: this.website,
           context: this.context(),
+          source: this.source,
         }),
         signal: AbortSignal.timeout(15000),
       });

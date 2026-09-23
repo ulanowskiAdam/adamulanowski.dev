@@ -63,6 +63,14 @@
   @if (errors().message) {
     <p id="message-error" class="field-error">{{ errors().message }}</p>
   }
+  <label for="source">Skąd o mnie wiesz? <span>(opcjonalnie)</span></label>
+  <select id="source" name="source" [(ngModel)]="source"
+    [disabled]="state() === 'sending' || state() === 'accepted'">
+    <option value="">Nie chcę podawać</option>
+    @for (item of sources; track item.value) {
+      <option [value]="item.value">{{ item.label }}</option>
+    }
+  </select>
   <div class="honeypot" aria-hidden="true">
     <label for="website">Zostaw to pole puste</label
     ><input id="website" name="website" [(ngModel)]="website" tabindex="-1" autocomplete="off" />

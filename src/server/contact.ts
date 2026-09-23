@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express';
 import { validEmail, validateContact } from '../shared/contact-validation';
+import { contactSource } from '../shared/contact-sources';
 
 type Dependencies = {
   apiKey: () => string | undefined;
@@ -7,6 +8,7 @@ type Dependencies = {
   to: () => string;
   send?: typeof fetch;
   now?: () => number;
+  onAccepted?: (source: string) => void;
 };
 const text = (value: unknown, max: number) =>
   typeof value === 'string' && value.length <= max ? value.trim() : '';
@@ -111,7 +113,8 @@ export function createContactHandler(deps: Dependencies): RequestHandler {
       res.status(503).json({ code: 'not_configured' });
       return;
     }
-    const body = `Nowe zapytanie ze strony\n\nImię: ${name.trim() || 'Nie podano'}\nKontakt: ${email.trim()}\n\n${message.trim()}${context ? '\n\nKontekst: ' + context : ''}`;
+    const source = contactSource(payload.source);
+    const body = `Nowe zapytanie ze strony\n\nImię: ${name.trim() || 'Nie podano'}\nKontakt: ${email.trim()}\nŹródło kontaktu: ${source?.label ?? 'Nie podano'}\n\n${message.trim()}${context ? '\n\nKontekst: ' + context : ''}`;
     // Reserve quota before awaiting the provider to cover concurrent requests.
     daily.push(time);
     try {
@@ -132,6 +135,8 @@ export function createContactHandler(deps: Dependencies): RequestHandler {
         res.status(502).json({ code: 'provider_error' });
         return;
       }
+      // Analytics failures must not turn a successfully sent message into a retry.
+      try { deps.onAccepted?.(source?.value ?? 'unknown'); } catch { /* best effort */ }
       res.status(202).json({ ok: true, status: 'accepted' });
     } catch {
       res.status(502).json({ code: 'provider_error' });

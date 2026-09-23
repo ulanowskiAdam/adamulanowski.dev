@@ -42,6 +42,12 @@ export const services = [
   },
   {
     slug: 'aplikacje-webowe',
+    deliverables: [
+      'Opis procesu, role użytkowników i lista funkcji pierwszej wersji uzgodnione przed budową.',
+      'Działająca wersja do testów oraz scenariusze odbioru, w tym błędy i ograniczenia dostępu.',
+      'Instrukcja obsługi i uzgodniony plan wdrożenia, kopii zapasowych oraz utrzymania.',
+    ],
+    acceptance: 'Przykład odbioru panelu zleceń: klient widzi wyłącznie swoje sprawy, pracownik zmienia status zgodnie z uprawnieniami, a niepoprawne dane nie zapisują się jako gotowe zlecenie. Konkretne scenariusze ustalamy dla Twojego procesu.',
     title: 'Aplikacje webowe dla firm',
     description:
       'Aplikacje w przeglądarce: panele klientów, konfiguratory, rezerwacje i obsługa zamówień. Zacznij od jednego procesu i rozwijaj narzędzie według potrzeb.',
@@ -118,6 +124,12 @@ export const services = [
   },
   {
     slug: 'integracje-ai',
+    deliverables: [
+      'Pilotaż jednego zadania na uzgodnionym zbiorze danych i przykładów.',
+      'Zestaw testów: poprawne odpowiedzi, brak informacji w źródłach i próby wyjścia poza zakres.',
+      'Podsumowanie jakości, czasu odpowiedzi i kosztu użycia oraz rekomendacja dalszego wdrożenia.',
+    ],
+    acceptance: 'Przykład odbioru asystenta wiedzy: odpowiedź wskazuje dokument źródłowy, pytanie spoza bazy trafia do człowieka, a dostęp respektuje uprawnienia użytkownika. Progi jakości i budżet ustalamy przed pilotażem.',
     title: 'Integracje AI dla firm',
     description:
       'Asystenci wiedzy, porządkowanie zapytań i podsumowania dokumentów. Integracje AI z Twoimi narzędziami, z kontrolą jakości i udziałem człowieka.',
@@ -150,8 +162,8 @@ export const services = [
         a: 'Tak. Ograniczamy zakres i określamy kryteria jakości oraz budżet użycia. Dopiero wyniki pilotażu są podstawą do decyzji o szerszym wdrożeniu.',
       },
     ],
-    project: 'kontent-architektura',
+    project: null,
     related:
-      'Zobacz sposób prezentacji oferty Kontent Architektura. Ta realizacja jest stroną internetową; nie przedstawiam jej jako wdrożenia AI.',
+      'W portfolio znajdziesz obecnie realizacje stron internetowych. Zakres AI opisany powyżej jest propozycją współpracy. Pierwszym krokiem jest pilotaż z mierzalnymi kryteriami jakości.',
   },
 ];

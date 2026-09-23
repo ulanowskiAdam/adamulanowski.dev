@@ -31,10 +31,24 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         <li>{{ step }}</li>
       }
     </ol>
-    <h2>Zobacz w praktyce</h2>
+    @if (service.deliverables) {
+      <h2>Co otrzymasz w uzgodnionym zakresie?</h2>
+      <ul>
+        @for (item of service.deliverables; track item) { <li>{{ item }}</li> }
+      </ul>
+      <h2>Po czym poznamy, że działa?</h2>
+      <p>{{ service.acceptance }}</p>
+    }
+    <h2>Realizacje i demonstracja</h2>
     <p>{{ service.related }}</p>
-    <p><a [routerLink]="['/realizacje', service.project]">Poznaj realizację →</a></p>
-    <p><a routerLink="/" fragment="configurator">Pobaw się interaktywnym demo →</a></p>
+    @if (service.project) {
+      <p><a [routerLink]="['/realizacje', service.project]">Poznaj realizację →</a></p>
+    }
+    <p>
+      <a routerLink="/demo/konfigurator">Wypróbuj konfigurator 3D →</a>
+      Własne demo interfejsu: wybierz branżę i dodatki, a następnie przekaż wybór do formularza.
+      Demo nie realizuje rezerwacji ani zapytań do modelu AI.
+    </p>
     <h2>Częste pytania</h2>
     @for (item of service.faq; track item.q) {
       <details>

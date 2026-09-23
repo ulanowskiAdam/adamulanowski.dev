@@ -5,7 +5,7 @@ import { createContactHandler } from '../src/server/contact';
 
 const valid = { version: 2, email: 'jan@example.com', message: 'Potrzebuję strony.' };
 async function server(
-  options: { key?: string; from?: string; send?: typeof fetch; now?: () => number } = {},
+  options: { key?: string; from?: string; send?: typeof fetch; now?: () => number; onAccepted?: (source: string) => void } = {},
 ) {
   const send = options.send ?? vi.fn().mockResolvedValue(new Response('{}', { status: 200 }));
   const app = express();
@@ -18,6 +18,7 @@ async function server(
       to: () => 'recipient@example.com',
       send,
       now: options.now,
+      onAccepted: options.onAccepted,
     }),
   );
   const listener: Server = createServer(app);
@@ -36,6 +37,24 @@ async function server(
 }
 
 describe('contact API', () => {
+  it('counts only provider-accepted messages and limits source to known categories', async () => {
+    const onAccepted = vi.fn();
+    const send = vi.fn().mockResolvedValueOnce(new Response('{}', { status: 502 }))
+      .mockResolvedValue(new Response('{}', { status: 200 }));
+    const api = await server({ onAccepted, send });
+    try {
+      await api.post({ ...valid, website: 'spam', source: 'chatgpt' });
+      await api.post({ ...valid, email: '', source: 'chatgpt' });
+      await api.post({ ...valid, source: 'chatgpt' });
+      expect(onAccepted).not.toHaveBeenCalled();
+      await api.post({ ...valid, source: 'chatgpt' });
+      expect(onAccepted).toHaveBeenNthCalledWith(1, 'chatgpt');
+      await api.post({ ...valid, source: 'private@example.com' });
+      expect(onAccepted).toHaveBeenNthCalledWith(2, 'unknown');
+      const payload = JSON.parse(send.mock.calls[1][1].body);
+      expect(payload.text).toContain('Źródło kontaktu: ChatGPT');
+    } finally { await api.close(); }
+  });
   it('accepts v2 without name or legacy fields, escapes HTML, preserves text and uses reply-to', async () => {
     const api = await server();
     try {

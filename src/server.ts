@@ -1,4 +1,5 @@
 import { createContactHandler } from './server/contact';
+import { canonicalHost } from './server/canonical-host';
 import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
@@ -14,6 +15,7 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 
 app.set('trust proxy', 1);
+app.use(canonicalHost);
 app.use(express.json({ limit: '16kb' }));
 
 const angularApp = new AngularNodeAppEngine({
@@ -39,6 +41,9 @@ app.post(
     apiKey: () => readSecret('RESEND_API_KEY'),
     from: () => process.env['RESEND_FROM_EMAIL'],
     to: () => process.env['CONTACT_EMAIL_TO'] ?? 'aulanowski98@gmail.com',
+    onAccepted: (source) => console.info(JSON.stringify({
+      event: 'contact_accepted', source, time: new Date().toISOString(),
+    })),
   }),
 );
 
@@ -59,6 +64,11 @@ app.use(
     maxAge: '1y',
     index: false,
     redirect: false,
+    setHeaders: (res, path) => {
+      if (path.endsWith('robots.txt') || path.endsWith('sitemap.xml')) {
+        res.setHeader('Cache-Control', 'public, max-age=300');
+      }
+    },
   }),
 );
 
