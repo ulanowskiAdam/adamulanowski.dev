@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
     <h2>Kto obsługuje Twoje dane?</h2>
     <p>
       Administratorem danych przekazywanych przez tę stronę jest Adam Ułanowski. W sprawach
-      prywatności napisz na <a href="mailto:aulanowski98@gmail.com">aulanowski98&#64;gmail.com</a>.
+      prywatności napisz na <a href="mailto:kontakt@adamulanowski.dev">kontakt&#64;adamulanowski.dev</a>.
     </p>
     <h2>Formularz kontaktowy</h2>
     <p>

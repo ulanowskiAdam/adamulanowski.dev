@@ -40,7 +40,7 @@ app.post(
   createContactHandler({
     apiKey: () => readSecret('RESEND_API_KEY'),
     from: () => process.env['RESEND_FROM_EMAIL'],
-    to: () => process.env['CONTACT_EMAIL_TO'] ?? 'aulanowski98@gmail.com',
+    to: () => process.env['CONTACT_EMAIL_TO'] ?? 'kontakt@adamulanowski.dev',
     onAccepted: (source) => console.info(JSON.stringify({
       event: 'contact_accepted', source, time: new Date().toISOString(),
     })),

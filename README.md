@@ -37,7 +37,7 @@ Keep only non-secret settings in `~/projects/adamulanowski.dev/.env`:
 
 ```dotenv
 RESEND_FROM_EMAIL=Adam Ułanowski <kontakt@mail.adamulanowski.dev>
-CONTACT_EMAIL_TO=aulanowski98@gmail.com
+CONTACT_EMAIL_TO=kontakt@adamulanowski.dev
 ```
 
 `RESEND_FROM_EMAIL` must use the exact domain verified in Resend. The API key is

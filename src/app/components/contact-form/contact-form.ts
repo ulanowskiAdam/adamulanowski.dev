@@ -87,7 +87,7 @@ export class ContactForm {
           result.code === 'rate_limited' || response.status === 429
             ? 'Zbyt wiele prób. Spróbuj ponownie później lub napisz bezpośrednio e-mailem.'
             : result.code === 'not_configured'
-              ? 'Formularz jest chwilowo niedostępny. Napisz na aulanowski98@gmail.com.'
+              ? 'Formularz jest chwilowo niedostępny. Napisz na kontakt@adamulanowski.dev.'
               : 'Dostawca poczty nie potwierdził przyjęcia wiadomości. Spróbuj ponownie lub napisz bezpośrednio e-mailem.',
         );
       }

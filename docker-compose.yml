@@ -8,7 +8,7 @@ services:
       PORT: "4000"
       RESEND_API_KEY_FILE: /run/secrets/resend_api_key
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
-      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-aulanowski98@gmail.com}
+      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-kontakt@adamulanowski.dev}
     secrets:
       - resend_api_key
     networks:
