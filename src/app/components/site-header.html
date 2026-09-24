@@ -1,0 +1,69 @@
+<a class="skip-link" href="#main">Przejdź do treści</a>
+<header class="container">
+  <a class="brand" routerLink="/" aria-label="Adam Ułanowski — strona główna">A<span>.</span></a>
+  <nav class="desktop-nav" aria-label="Główna nawigacja">
+    <a routerLink="/" fragment="uslugi">Usługi</a>
+    <a routerLink="/" fragment="realizacje">Realizacje</a>
+    <a routerLink="/o-mnie">O mnie</a>
+    <a class="contact-link" routerLink="/" fragment="contact"
+      >Porozmawiajmy <span aria-hidden="true">↗</span></a
+    >
+  </nav>
+  <button
+    class="menu-toggle"
+    type="button"
+    aria-label="Otwórz menu"
+    aria-controls="mobile-navigation"
+    aria-haspopup="dialog"
+    [attr.aria-expanded]="menuOpen()"
+    (click)="openMenu()"
+  >
+    <span>Menu</span><span class="menu-icon" aria-hidden="true"><i></i><i></i></span>
+  </button>
+</header>
+<dialog
+  #drawer
+  id="mobile-navigation"
+  aria-labelledby="menu-title"
+  (click)="closeOnBackdrop($event)"
+  (close)="restoreScroll()"
+>
+  <div class="drawer-panel">
+    <div class="drawer-top">
+      <span class="brand" aria-hidden="true">A<span>.</span></span>
+      <button
+        class="menu-toggle close-toggle"
+        type="button"
+        aria-label="Zamknij menu"
+        (click)="closeMenu()"
+        autofocus
+      >
+        <span>Zamknij</span><span class="menu-icon" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+    <div class="drawer-content">
+      <p class="eyebrow" id="menu-title">Nawigacja</p>
+      <nav class="mobile-nav" aria-label="Główna nawigacja mobilna">
+        <a routerLink="/" fragment="uslugi" (click)="closeMenu()"
+          ><span class="link-number">01</span><span>Usługi</span
+          ><span class="link-arrow" aria-hidden="true">↗</span></a
+        >
+        <a routerLink="/" fragment="realizacje" (click)="closeMenu()"
+          ><span class="link-number">02</span><span>Realizacje</span
+          ><span class="link-arrow" aria-hidden="true">↗</span></a
+        >
+        <a routerLink="/o-mnie" (click)="closeMenu()"
+          ><span class="link-number">03</span><span>O mnie</span
+          ><span class="link-arrow" aria-hidden="true">↗</span></a
+        >
+      </nav>
+    </div>
+    <div class="drawer-bottom">
+      <p>Masz pomysł na projekt?</p>
+      <a class="drawer-contact" routerLink="/" fragment="contact" (click)="closeMenu()"
+        >Porozmawiajmy <span aria-hidden="true">↗</span></a
+      >
+      <span class="signature">Adam Ułanowski <span aria-hidden="true">/</span> Web Developer</span>
+    </div>
+  </div>
+</dialog>
