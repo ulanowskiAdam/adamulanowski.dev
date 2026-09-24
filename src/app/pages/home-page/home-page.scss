@@ -369,7 +369,8 @@
 .hero-stage {
   position: relative;
   width: 100%;
-  height: clamp(320px, 48svh, 560px);
+  // Keep the stage stable when mobile browser controls appear or disappear.
+  height: 420px;
   background: radial-gradient(ellipse at center, #26321c70, transparent 68%);
 }
 .hero-copy {
@@ -397,7 +398,7 @@
     padding-block: 16px 40px;
   }
   .hero-stage {
-    height: clamp(280px, 42svh, 400px);
+    height: 320px;
   }
   .hero h1 {
     font-size: 2rem;
@@ -412,7 +413,7 @@
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     grid-template-rows: 1fr;
     column-gap: 24px;
-    min-height: min(780px, calc(100svh - 88px));
+    min-height: 680px;
     padding-block: 32px 48px;
     text-align: left;
   }
@@ -426,7 +427,7 @@
   .hero-stage {
     grid-column: 2;
     grid-row: 1;
-    height: clamp(420px, 62svh, 640px);
+    height: 560px;
   }
   .hero .eyebrow {
     font-size: 13px;

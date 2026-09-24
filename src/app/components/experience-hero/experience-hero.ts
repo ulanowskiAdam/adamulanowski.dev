@@ -55,7 +55,7 @@ export class ExperienceHero {
       ...this.store.selectedAddons().map((item) => item.label),
     ]
       .filter(Boolean)
-      .join(' — ')
+      .join(' - ')
       .slice(0, 500);
   }
 }

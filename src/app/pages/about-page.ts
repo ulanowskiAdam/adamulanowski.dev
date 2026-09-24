@@ -18,7 +18,7 @@ import { RouterLink } from '@angular/router';
     />
     <p>
       Łączę to, co widzisz na ekranie, z tym, co dzieje się pod spodem. Tworzę strony internetowe i
-      aplikacje webowe — od interfejsu, przez logikę działania, po połączenia z innymi systemami.
+      aplikacje webowe - od interfejsu, przez logikę działania, po połączenia z innymi systemami.
     </p>
     <p>
       Pracuję zarówno przy frontendzie, jak i backendzie, więc patrzę na produkt jako całość. Lubię

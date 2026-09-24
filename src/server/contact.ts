@@ -124,7 +124,7 @@ export function createContactHandler(deps: Dependencies): RequestHandler {
         body: JSON.stringify({
           from,
           to: [deps.to()],
-          subject: 'Nowe zapytanie — adamulanowski.dev',
+          subject: 'Nowe zapytanie - adamulanowski.dev',
           ...(validEmail(email.trim()) ? { reply_to: email.trim() } : {}),
           text: body,
           html: `<div style="white-space:pre-wrap">${escapeHtml(body)}</div>`,

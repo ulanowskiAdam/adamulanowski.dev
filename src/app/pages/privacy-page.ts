@@ -58,7 +58,7 @@ import { Component } from '@angular/core';
       Informacje o prawach:
       <a
         href="https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en"
-        >ochrona danych — Komisja Europejska</a
+        >ochrona danych - Komisja Europejska</a
       >.
     </p>
   </main>`,

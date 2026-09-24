@@ -61,10 +61,10 @@ w Search Console. Za punkt odniesienia przyjmij pierwszy pełny miesiąc pomiaru
 
 ## Źródła i ograniczenia
 
-- https://developers.openai.com/api/docs/bots — wyszukiwanie i trening mają oddzielne roboty.
-- https://developers.google.com/search/docs/fundamentals/ai-optimization-guide — podstawy
+- https://developers.openai.com/api/docs/bots - wyszukiwanie i trening mają oddzielne roboty.
+- https://developers.google.com/search/docs/fundamentals/ai-optimization-guide - podstawy
   wyszukiwania i wartościowa treść, bez potrzeby dodawania llms.txt.
-- https://support.google.com/webmasters/answer/9008080 — weryfikacja własności.
+- https://support.google.com/webmasters/answer/9008080 - weryfikacja własności.
 
 robots.txt pozwala na indeksowanie; nie potwierdza obecności w wynikach ani odpowiedziach AI.
 Nie ma gwarancji poleceń przez ChatGPT. W repozytorium nie ma danych Search Console,

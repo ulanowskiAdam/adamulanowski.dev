@@ -26,7 +26,7 @@ export const services = [
       },
       {
         q: 'Czy strona będzie widoczna w Google?',
-        a: 'Przygotowuję podstawy techniczne i strukturę treści: tytuły, opisy, nagłówki, linkowanie oraz mapę strony. Pozycje zależą również od konkurencji, jakości treści i dalszych działań — nie obiecuję konkretnego miejsca.',
+        a: 'Przygotowuję podstawy techniczne i strukturę treści: tytuły, opisy, nagłówki, linkowanie oraz mapę strony. Pozycje zależą również od konkurencji, jakości treści i dalszych działań - nie obiecuję konkretnego miejsca.',
       },
       {
         q: 'Ile kosztuje wykonanie strony?',

@@ -37,7 +37,7 @@ export class HomePage {
       title: 'Strony internetowe',
       need: 'Chcesz, żeby klient od razu rozumiał Twoją ofertę i wiedział, jak się odezwać.',
       solution:
-        'Tworzę czytelne strony, które przedstawiają Twoją firmę i prowadzą do kontaktu — również na telefonie.',
+        'Tworzę czytelne strony, które przedstawiają Twoją firmę i prowadzą do kontaktu - również na telefonie.',
       examples: 'Strona firmowa · landing page · prezentacja oferty',
       icon: '↗',
     },
