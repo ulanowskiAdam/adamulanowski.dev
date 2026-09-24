@@ -1,16 +1,5 @@
 <main id="main" tabindex="-1">
   <section class="hero container" aria-labelledby="hero-title">
-    <nav id="configurator" class="hero-industries" aria-label="Otwórz konfigurator dla swojej branży">
-      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'gastronomia' }"
-        >Gastronomia <span aria-hidden="true">↗</span></a
-      >
-      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'wizyty' }"
-        >Wizyty <span aria-hidden="true">↗</span></a
-      >
-      <a routerLink="/demo/konfigurator" [queryParams]="{ branza: 'fachowcy' }"
-        >Usługi <span aria-hidden="true">↗</span></a
-      >
-    </nav>
     <div
       class="hero-stage"
       role="img"
@@ -27,6 +16,9 @@
       </p>
       <div class="actions">
         <a class="button primary" href="#contact">Porozmawiajmy o Twoim projekcie ↗</a>
+        <a id="configurator" class="button configurator-button" routerLink="/demo/konfigurator">
+          Uruchom konfigurator <span aria-hidden="true">→</span>
+        </a>
       </div>
     </div>
   </section>
