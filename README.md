@@ -1,233 +1,120 @@
-# AdamulanowskiDev
+# adamulanowski.dev
 
-Instrukcja widoczności, Search Console i pomiaru zapytań: [docs/widocznosc-i-pomiar.md](docs/widocznosc-i-pomiar.md).
+Personal website and portfolio of **Adam Ułanowski**, presenting web development, business process automation, and AI integration services.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.7.
+The site is written in Polish and combines service pages, selected client projects, an interactive 3D demo, and a contact form.
 
-## VPS deployment behind the reverse proxy
+## Features
 
-The reverse proxy owns host ports 80 and 443. The website listens on port 4000
-inside Docker and publishes no host port. Both containers must share a Docker
-network. Check the existing proxy's networks on the VPS:
+- Dedicated pages for business websites, web applications, process automation, and AI integrations.
+- Project showcases for Lifting Paulina Karol, Fizjomind, and Kontent Architektura.
+- A Three.js demo with industry scenes and selectable features that visitors can include as context in a contact enquiry.
+- A contact endpoint backed by Resend, with shared validation, a honeypot, and request limits.
+- Prerendered content pages, route metadata, a sitemap, canonical host redirects, and server-rendered HTTP 404 responses.
 
-```bash
-docker inspect proxy-app-1 --format '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}'
+## Stack
+
+Angular 22 · TypeScript 6 · Three.js · Tailwind CSS 4 · Express 5 · Vitest
+
+Production runs on Node.js 24 in Docker, behind an existing reverse proxy. GitHub Actions builds the image, publishes it to GHCR, and deploys it to a VPS.
+
+## Getting started
+
+Use **Node.js 24** and **npm 11** (the project declares npm 11.19.0).
+
+```sh
+npm ci
+npm start
 ```
 
-Compose defaults to the existing `proxy_default` network. If the proxy uses a
-different network, set `PROXY_NETWORK=actual_network_name` in
-`~/projects/adamulanowski.dev/.env` on the VPS. Use a network attached to the proxy;
-creating an unrelated network will not connect the two containers.
+Open `http://localhost:4200`. Email credentials are optional for browsing and UI development; sending a contact request requires the configuration below.
 
-The contact form sends email through Resend. Verify `adamulanowski.dev` (preferably
-a sending subdomain such as `mail.adamulanowski.dev`) in Resend and create a
-sending-only API key restricted to that domain. Store the key as a Docker Compose
-secret on the VPS; entering it with `read` keeps it out of shell history:
+To build and run the production server locally:
 
-```bash
-install -d -m 700 ~/projects/adamulanowski.dev/secrets
-read -rsp 'Resend API key: ' RESEND_KEY
-printf '\n'
-printf '%s' "$RESEND_KEY" > ~/projects/adamulanowski.dev/secrets/resend_api_key
-unset RESEND_KEY
-chmod 600 ~/projects/adamulanowski.dev/secrets/resend_api_key
+```sh
+npm run preview
 ```
 
-Keep only non-secret settings in `~/projects/adamulanowski.dev/.env`:
+Open `http://localhost:4000`. Use this production build when checking rendering or performance.
 
-```dotenv
-RESEND_FROM_EMAIL=Adam Ułanowski <kontakt@mail.adamulanowski.dev>
-CONTACT_EMAIL_TO=kontakt@adamulanowski.dev
+## Commands
+
+| Command                               | Purpose                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------ |
+| `npm start`                           | Start the development server with live reload.                                       |
+| `npm run build`                       | Build the production app and prerender content pages into `dist/adamulanowski.dev/`. |
+| `npm run preview`                     | Build and start the production Express server.                                       |
+| `npm run serve:ssr:adamulanowski.dev` | Start an existing production build.                                                  |
+| `npm run watch`                       | Rebuild in development mode when files change.                                       |
+| `npm test -- --watch=false`           | Run Angular unit and component tests once.                                           |
+| `npm run test:api`                    | Run contact API and canonical host tests.                                            |
+
+## Project structure
+
+```text
+src/app/
+  components/        Shared UI, contact form, and interactive 3D scenes
+  content/           Service and project data
+  pages/             Home, services, projects, about, privacy, demo, and 404
+  app.routes.ts      Browser routes
+  app.routes.server.ts  Prerendering and server rendering rules
+src/server/          Contact handler and canonical host middleware
+src/shared/          Contact validation and source values
+src/server.ts        Express server and Angular SSR integration
+public/              Site images, favicon, robots.txt, and sitemap.xml
+scripts/             Contact log reporting utility
+tests/              API and redirect tests
+.github/workflows/   Docker build and VPS deployment
 ```
 
-`RESEND_FROM_EMAIL` must use the exact domain verified in Resend. The API key is
-mounted read-only at `/run/secrets/resend_api_key`, is not exposed through the
-container environment, and is never included in the browser bundle or image.
-The server also stops calling the provider after 80 send attempts in 24 hours,
-leaving headroom below Resend's free daily limit.
+Edit service and portfolio content in `src/app/content/`. Public image variants are used by the site for responsive rendering. When changing public routes, keep `public/sitemap.xml` in sync.
 
-Configure the proxy host for `adamulanowski.dev` to forward using HTTP to
-`adamulanowski-web`, port `4000`. Do not use `localhost`: inside the proxy container
-that address refers to the proxy itself.
+The main content routes are prerendered at build time. `/demo/konfigurator` remains available with `noindex`; unknown paths return HTTP 404. The application still needs the Node server for the contact API and request handling.
 
-GitHub Actions copies `docker-compose.yml` to the VPS before each deployment and
-recreates the website container as needed, using the immutable digest produced by
-that build. The server's `.env` is preserved. The workflow requires Docker Compose
-v2 with `--wait`, `--wait-timeout`, and `config --format json` support.
-For a manual deployment, copy the updated Compose file to the VPS, then run:
+## Contact configuration
 
-```bash
-cd ~/projects/adamulanowski.dev
-docker compose config --quiet
-docker compose pull
-docker compose up -d --no-deps --wait --wait-timeout 120 web
-docker exec proxy-app-1 nginx -t && docker exec proxy-app-1 nginx -s reload
-docker compose ps
+The server reads these environment variables:
+
+| Variable              | Purpose                                                            |
+| --------------------- | ------------------------------------------------------------------ |
+| `RESEND_API_KEY_FILE` | Path to a file containing the Resend API key; preferred in Docker. |
+| `RESEND_API_KEY`      | Fallback API key when no usable secret file is available.          |
+| `RESEND_FROM_EMAIL`   | Sender address on a domain verified in Resend.                     |
+| `CONTACT_EMAIL_TO`    | Recipient; defaults to `kontakt@adamulanowski.dev`.                |
+| `PORT`                | Production server port; defaults to `4000`.                        |
+
+For local email testing, create an ignored `.env` file with `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and optionally `CONTACT_EMAIL_TO`, then run:
+
+```sh
+npm run build
+node --env-file=.env dist/adamulanowski.dev/server/server.mjs
 ```
 
-The healthcheck uses Node (already present in the image) to require HTTP 200 from
-the application. The explicit Host header matches the SSR host allowlist. No host
-port mapping is needed: NPM must use HTTP to `adamulanowski-web:4000`.
+The npm scripts do not automatically load `.env`. Docker Compose reads it for deployment settings; `.env.example` contains those non-secret defaults.
 
-Before replacing the container, the workflow checks that NPM is running and
-attached to the configured external network. After startup it tests the upstream
-from NPM's network namespace, then gracefully reloads Nginx to refresh upstream
-resolution after a possible container IP change. This checks upstream connectivity;
-verify public HTTPS separately to check the NPM proxy-host and certificate setup.
-
-On a deployment failure, the workflow prints diagnostics and attempts to restore
-the previous local image using the current Compose configuration. This is an image
-rollback, not a rollback of configuration or data. A first deployment has no image
-to restore. Images are retained for recovery. `WEB_IMAGE` can also be set to a
-specific digest for a manual deployment; otherwise Compose defaults to `latest`.
-
-This is a single-instance deployment with a brief interruption, not zero downtime.
-Compose replaces the container and reconnects its successor to `proxy_default`
-(or the configured external network); it does not preserve existing connections.
-True zero downtime requires two application instances (blue-green), readiness
-verification before switching NPM, and draining the old instance before stopping it.
-
-## Development server
-
-### Pomiar Lighthouse
-
-Uruchom `npm run preview` i otwórz `http://localhost:4000` w profilu Chrome bez
-rozszerzeń. Ta komenda buduje i uruchamia wersję produkcyjną z SSR, minifikacją
-i tree shakingiem. `npm start` na porcie 4200 służy do pracy nad kodem i nie jest
-miarodajny dla pomiaru wydajności produkcji. Mierz osobno wejście na `/` i wejście
-z `#contact`, zachowując ten sam profil urządzenia i ustawienia Lighthouse.
-
-Scena 3D ładuje się przy zbliżeniu do widocznego obszaru. Strona główna tworzy tylko
-używaną makietę restauracji; konfigurator nadal przygotowuje pozostałe branże na
-desktopie. Parametry jakości renderowania i pliki grafik pozostają bez zmian.
-
-Przed pierwszą klatką scena przygotowuje shadery przez `compileAsync`, aby ograniczyć
-synchroniczne oczekiwanie na GPU. Zegar animacji startuje po ich przygotowaniu.
-Zmiana trasy w trakcie kompilacji zatrzymuje start animacji i zwalnia zasoby po
-zakończeniu kompilacji. Nie zmienia to modeli, materiałów ani parametrów jakości.
-Wynik lokalnego Chrome w trybie headless nie jest bezpośrednio porównywalny z
-PageSpeed Insights; efekt należy ponownie zmierzyć na wdrożonej stronie.
-
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-## Refaktoryzacja oferty i kontaktu
-
-- Strona główna, cztery strony usług, trzy realizacje oraz strony o mnie, prywatności
-  i zgodnościowy adres /demo/konfigurator są prerenderowane (łącznie 11 tras).
-- Konfigurator to otwarte demo do zabawy: wybór sceny i dodatków bez ankiety lub kroków.
-  Kontakt jest zawsze dostępny, także bez interakcji z demo. Wybrane inspiracje można
-  przekazać do formularza bez utraty wpisanej wiadomości.
-- Scena 3D jest widoczna od razu w pierwszym ekranie, bez przycisku uruchamiania.
-  Three.js ładuje się automatycznie po renderowaniu strony; scenę aktualizuje wybór branży.
-  Portret 3D pozostał wyłącznie jako niewykorzystywany kod eksperymentalny, poza publiczną ścieżką.
-- /demo/konfigurator pozostaje dla starych linków z noindex. Sitemap zawiera ofertę,
-  realizacje i stronę o mnie; pomija demo i prywatność.
-- Stare kotwice działają: #about, #capabilities, #contact, #configurator.
-  Nowa sekcja realizacji ma kotwicę #realizacje.
-- Treść usług i realizacji znajduje się w src/app/content. Autor potwierdził trzy realizacje:
-  Lifting Paulina Karol, Fizjomind i Kontent Architektura. Opisy dotyczą widocznych funkcji,
-  bez deklaracji wzrostu sprzedaży lub wyników bez pomiarów. Zrzuty wykonano 21.09.2026.
-- Grafika udostępniania: public/images/offer-social.png (1200×630), edytowalne źródło SVG obok.
-  Dane strukturalne zawierają dane kontaktowe, logo i adresy usług; nie dodano adresu siedziby.
-- Nieznane ścieżki zwracają stronę 404 i status HTTP 404 przez serwer Angular/Express.
-  Hosting musi przekazywać te żądania do serwera, bez własnego przekierowania na home.
-
-### Kontakt v2
-
-POST /api/contact, JSON:
+`POST /api/contact` accepts the current form payload:
 
 ```json
 {
   "version": 2,
-  "name": "",
-  "email": "client@example.com",
-  "message": "Potrzebuję strony.",
+  "name": "Jane",
+  "email": "jane@example.com",
+  "message": "I would like to discuss a website.",
   "website": "",
   "context": ""
 }
 ```
 
-Imię (do 100 znaków) i kontekst (do 500 znaków) są opcjonalne.
-Wymagane: poprawny e-mail (do 254 znaków) i wiadomość (1–2000 znaków, nie same spacje).
-Pole website jest honeypotem. Nie umieszczaj danych osobowych w kontekście konfiguratora,
-ponieważ jest przekazywany w URL. Formularz pozwala usunąć kontekst.
+Email and message are required. Name and demo context are optional; `website` is a honeypot and must remain empty. A `202` response acknowledges acceptance, not confirmed email delivery. Missing email configuration returns `503`.
 
-Odpowiedzi: 202 {ok:true,status:"accepted"}; 400 {code:"validation_error",fields:{...}};
-429 {code:"rate_limited"} z Retry-After; 503 {code:"not_configured"};
-502 {code:"provider_error"}. Przyjęcie nie potwierdza doręczenia.
-Nieprawidłowy JSON daje 400, przekroczenie 16 KB daje 413.
-Kontrakt bez version lub z version:1 nadal obsługuje dawny formularz (także kontakt telefoniczny).
-Limity: 5 prób / 15 minut / IP oraz 80 wywołań dostawcy / 24 h na proces;
-przy wielu instancjach potrzebny jest wspólny magazyn limitów.
-Zachowano konfigurację trust proxy=1 — infrastruktura powinna mieć jeden zaufany reverse proxy.
+Limits are held in memory per process: five attempts per IP in 15 minutes and 80 provider calls in 24 hours. The server trusts one reverse proxy; changing the proxy topology or running multiple instances requires reviewing this setup.
 
-### Sprawdzenie lokalne
+## Deployment
+
+The [deployment guide](docs/deployment.md) describes the Docker network, email secret, reverse proxy, and GitHub Actions configuration.
+
+Operational notes for search visibility and contact-source reporting are available in [docs/widocznosc-i-pomiar.md](docs/widocznosc-i-pomiar.md) (Polish). The reporting utility counts provider-accepted enquiries from existing server logs:
 
 ```sh
-npm run build -- --stats-json
-npm test -- --watch=false
-npm run test:api
-npm run serve:ssr:adamulanowski.dev
+node scripts/contact-report.mjs contact-log.txt
 ```
-
-Test przeglądarkowy: `node tests/browser-check.mjs` przy uruchomionym serwerze na localhost:4000.
-Wymaga Playwright i Edge. Można wskazać moduł przez PLAYWRIGHT_MODULE,
-inny adres serwera przez TEST_ORIGIN. Test używa atrapy odpowiedzi na wysyłanie wiadomości
-i nie wysyła prawdziwej poczty. Zrzuty i raport trafiają do ignorowanego artifacts/ux-check.
-
-Przed publikacją właściciel powinien potwierdzić opis prywatności względem faktycznych
-dostawców hostingu/poczty, transferów poza EOG i stosowanych okresów przechowywania.
-Repozytorium nie zawiera umów ani konfiguracji retencji tych dostawców.
-Konfigurację Resend i rzeczywiste doręczenie należy sprawdzić na środowisku wdrożenia.
