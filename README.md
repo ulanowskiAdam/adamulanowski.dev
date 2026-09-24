@@ -101,6 +101,13 @@ Scena 3D ładuje się przy zbliżeniu do widocznego obszaru. Strona główna two
 używaną makietę restauracji; konfigurator nadal przygotowuje pozostałe branże na
 desktopie. Parametry jakości renderowania i pliki grafik pozostają bez zmian.
 
+Przed pierwszą klatką scena przygotowuje shadery przez `compileAsync`, aby ograniczyć
+synchroniczne oczekiwanie na GPU. Zegar animacji startuje po ich przygotowaniu.
+Zmiana trasy w trakcie kompilacji zatrzymuje start animacji i zwalnia zasoby po
+zakończeniu kompilacji. Nie zmienia to modeli, materiałów ani parametrów jakości.
+Wynik lokalnego Chrome w trybie headless nie jest bezpośrednio porównywalny z
+PageSpeed Insights; efekt należy ponownie zmierzyć na wdrożonej stronie.
+
 To start a local development server, run:
 
 ```bash

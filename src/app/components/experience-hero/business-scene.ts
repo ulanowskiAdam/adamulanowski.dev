@@ -72,9 +72,9 @@ export class BusinessScene implements OnDestroy {
     void import('./business-scene.runtime')
       .then(({ BusinessSceneRuntime }) => {
         if (this.destroyed || !this.host || !this.sceneCanvas) return;
-        this.zone.runOutsideAngular(() => {
+        return this.zone.runOutsideAngular(() => {
           this.runtime = new BusinessSceneRuntime(this.host!, this.sceneCanvas!, this);
-          this.runtime.init();
+          return this.runtime.init();
         });
       })
       .catch(() => {

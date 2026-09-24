@@ -29,6 +29,8 @@ export class BusinessSceneRuntime {
   private rimLight?: THREE.PointLight;
   private environmentTarget?: THREE.WebGLRenderTarget;
   private destroyed = false;
+  private preparing = false;
+  private compiling = false;
   private visible = true;
   private intersectionObserver?: IntersectionObserver;
   private resizeObserver?: ResizeObserver;
@@ -106,12 +108,12 @@ export class BusinessSceneRuntime {
   ) {}
 
   update(): void {
-    if (!this.world || this.destroyed) return;
+    if (!this.world || this.destroyed || this.preparing) return;
     this.sync(this.state.industry(), this.state.step());
   }
 
   sync(industry: IndustryId | null, step: number): void {
-    if (!this.world || this.destroyed) return;
+    if (!this.world || this.destroyed || this.preparing) return;
     this.markMoving(700);
     this.updateDynamicPixelRatio(performance.now());
     this.currentStep = step;
@@ -136,12 +138,17 @@ export class BusinessSceneRuntime {
     host?.removeEventListener('pointerup', this.pointerUp);
     host?.removeEventListener('pointercancel', this.pointerUp);
     host?.removeEventListener('lostpointercapture', this.pointerUp);
+    this.intersectionObserver?.disconnect();
+    document.removeEventListener('visibilitychange', this.visibilityChange);
+    // compileAsync polls material programs; keep them alive until it settles.
+    if (!this.compiling) this.disposeResources();
+  }
+
+  private disposeResources(): void {
     this.mockups.forEach((mockup) => mockup.group.removeFromParent());
     if (this.scene) disposeGroup(this.scene);
     this.mockups.forEach((mockup) => disposeGroup(mockup.group));
     this.mockups.clear();
-    this.intersectionObserver?.disconnect();
-    document.removeEventListener('visibilitychange', this.visibilityChange);
     if (this.scene) this.scene.environment = null;
     this.environmentTarget?.dispose();
     this.industries.length = 0;
@@ -150,9 +157,10 @@ export class BusinessSceneRuntime {
     this.renderer = undefined;
   }
 
-  init(): void {
+  init(): Promise<void> | void {
     const host = this.host?.nativeElement;
     if (!host) return;
+    this.preparing = true;
     this.mobileMode = matchMedia('(max-width: 600px), (pointer: coarse)').matches;
     this.primitives = new ScenePrimitives(this.mobileMode);
     this.motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
@@ -223,15 +231,33 @@ export class BusinessSceneRuntime {
     this.resize();
     this.swapIndustry(this.state.industry());
     this.currentStep = this.state.step();
-    this.startedAt = performance.now();
-    this.previousFrame = this.startedAt;
-    this.motionUntil = this.startedAt + 900;
     document.addEventListener('visibilitychange', this.visibilityChange);
     this.intersectionObserver = new IntersectionObserver(([entry]) => {
       this.visible = entry.isIntersecting;
       this.visibilityChange();
     });
     this.intersectionObserver.observe(host);
+    return this.prepareFirstFrame();
+  }
+
+  private async prepareFirstFrame(): Promise<void> {
+    this.compiling = true;
+    try {
+      // Compile the same materials ahead of the first draw without waiting
+      // synchronously for the GPU in an animation frame.
+      await this.renderer!.compileAsync(this.scene!, this.camera!);
+    } finally {
+      this.compiling = false;
+      if (this.destroyed) this.disposeResources();
+    }
+    if (this.destroyed) return;
+    this.preparing = false;
+    // Start the animation clock only when its first frame can be displayed.
+    this.startedAt = performance.now();
+    this.previousFrame = this.startedAt;
+    this.motionUntil = this.startedAt + 900;
+    this.currentStep = this.state.step();
+    if (this.state.industry() !== this.currentIndustry) this.swapIndustry(this.state.industry());
     this.invalidate();
   }
 
@@ -361,7 +387,7 @@ export class BusinessSceneRuntime {
 
   // All callers run outside Angular; only one frame may be queued at a time.
   private invalidate(): void {
-    if (this.destroyed || !this.renderer || this.frameId || !this.visible || document.hidden)
+    if (this.destroyed || this.preparing || !this.renderer || this.frameId || !this.visible || document.hidden)
       return;
     this.frameId = requestAnimationFrame(this.animate);
   }

@@ -238,6 +238,73 @@ describe('scene frame scheduling', () => {
     runtime.destroy();
   });
 
+  it('waits for shader compilation before starting the animation clock', async () => {
+    const raf = vi.fn().mockReturnValue(1);
+    vi.stubGlobal('requestAnimationFrame', raf);
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.preparing = true;
+    state.currentIndustry = null;
+    let finish!: () => void;
+    state.renderer.compileAsync = vi.fn(() => new Promise<void>(resolve => { finish = resolve; }));
+    const preparation = state.prepareFirstFrame();
+    state.invalidate();
+    runtime.sync('gastronomia', 1);
+    expect(raf).not.toHaveBeenCalled();
+    expect(state.renderer.render).not.toHaveBeenCalled();
+    expect(state.startedAt).toBe(0);
+    finish();
+    await preparation;
+    expect(state.startedAt).toBeGreaterThan(0);
+    expect(raf).toHaveBeenCalledTimes(1);
+    runtime.destroy();
+  });
+
+  it('keeps shader resources alive during compilation and never resumes after destruction', async () => {
+    const raf = vi.fn();
+    vi.stubGlobal('requestAnimationFrame', raf);
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    const renderer = state.renderer;
+    let finish!: () => void;
+    renderer.compileAsync = vi.fn(() => new Promise<void>(resolve => { finish = resolve; }));
+    const preparation = state.prepareFirstFrame();
+    runtime.destroy();
+    expect(renderer.dispose).not.toHaveBeenCalled();
+    finish();
+    await preparation;
+    runtime.destroy();
+    expect(renderer.dispose).toHaveBeenCalledTimes(1);
+    expect(raf).not.toHaveBeenCalled();
+  });
+
+  it('uses the latest selection if it changes while shaders are compiling', async () => {
+    vi.stubGlobal('requestAnimationFrame', vi.fn());
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    state.preparing = true;
+    let finish!: () => void;
+    state.renderer.compileAsync = () => new Promise<void>(resolve => { finish = resolve; });
+    const preparation = state.prepareFirstFrame();
+    state.state = { industry: () => 'gastronomia', step: () => 2 };
+    finish();
+    await preparation;
+    expect(state.currentIndustry).toBe('gastronomia');
+    expect(state.currentStep).toBe(2);
+    expect(state.industries[0].group.scale.x).toBe(1.15);
+    runtime.destroy();
+  });
+
+  it('propagates compilation failures so the component can show its fallback and dispose resources', async () => {
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const { runtime, state } = scene();
+    const renderer = state.renderer;
+    renderer.compileAsync = vi.fn().mockRejectedValue(new Error('shader failure'));
+    await expect(state.prepareFirstFrame()).rejects.toThrow('shader failure');
+    runtime.destroy();
+    expect(renderer.dispose).toHaveBeenCalledTimes(1);
+  });
+
   it('uses motion DPR during interaction and restores sharp mobile DPR at rest', () => {
     vi.stubGlobal('cancelAnimationFrame', vi.fn());
     const { runtime, state } = scene();
