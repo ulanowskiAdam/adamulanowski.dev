@@ -59,4 +59,10 @@ export const projects = [
     result:
       'Osoba zainteresowana współpracą może przedstawić zakres projektu już w pierwszym zapytaniu, korzystając z pól dopasowanych do usług architektonicznych.',
   },
-];
+].map((project) => ({
+  ...project,
+  imageSrcset: [240, 320, 480, 640, 960]
+    .map((width) => `${project.image.replace('.webp', `-${width}.webp`)} ${width}w`)
+    .concat(`${project.image} 1440w`)
+    .join(', '),
+}));

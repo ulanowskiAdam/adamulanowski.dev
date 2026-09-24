@@ -3,10 +3,11 @@ import { BusinessScene } from '../../components/experience-hero/business-scene';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ContactForm } from '../../components/contact-form/contact-form';
+import { TextReveal } from '../../components/text-reveal';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, ContactForm, BusinessScene],
+  imports: [RouterLink, ContactForm, BusinessScene, TextReveal],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
 })

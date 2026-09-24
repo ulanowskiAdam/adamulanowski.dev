@@ -14,6 +14,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     <img
       class="project-screen"
       [src]="project.image"
+      [attr.srcset]="project.imageSrcset"
+      sizes="(min-width: 1264px) 1184px, (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)"
       [alt]="'Strona główna ' + project.name"
       width="1440"
       height="1000"

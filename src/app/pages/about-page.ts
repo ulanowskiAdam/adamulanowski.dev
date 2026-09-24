@@ -9,6 +9,8 @@ import { RouterLink } from '@angular/router';
     <h1>Cześć, jestem Adam Ułanowski.</h1>
     <img
       src="/images/adam-ulanowski-dark.webp"
+      srcset="/images/adam-ulanowski-dark-240.webp 240w, /images/adam-ulanowski-dark-320.webp 320w, /images/adam-ulanowski-dark-480.webp 480w, /images/adam-ulanowski-dark-640.webp 640w, /images/adam-ulanowski-dark.webp 900w"
+      sizes="240px"
       alt="Adam Ułanowski"
       width="240"
       height="300"
