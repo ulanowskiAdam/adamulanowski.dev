@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Analytics } from '../analytics';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 export { SiteHeader } from './site-header';
 
@@ -10,7 +11,7 @@ export { SiteHeader } from './site-header';
     <nav aria-label="Linki w stopce">
       <a routerLink="/polityka-prywatnosci">Polityka prywatności</a
       ><a href="https://github.com/ulanowskiAdam">GitHub ↗</a
-      ><a routerLink="/" fragment="configurator">Interaktywne demo</a>
+      ><a routerLink="/" fragment="configurator">Interaktywne demo</a><button type="button" (click)="analytics.visible.set(true)">Ustawienia analityki</button>
     </nav>
   </footer>`,
   styles: `
@@ -29,11 +30,13 @@ export { SiteHeader } from './site-header';
       gap: 24px;
       flex-wrap: wrap;
     }
+    button { color:inherit; background:none; border:0; font:inherit; padding-block:10px; cursor:pointer; }
     a {
       padding-block: 10px;
     }
   `,
 })
 export class SiteFooter {
+  readonly analytics = inject(Analytics);
   readonly year = new Date().getFullYear();
 }

@@ -12,8 +12,7 @@ import { Component } from '@angular/core';
     </p>
     <h2>Formularz kontaktowy</h2>
     <p>
-      Do odpowiedzi potrzebuję Twojego adresu e-mail i treści wiadomości. Imię oraz kontekst z
-      demonstracji są opcjonalne. Nie podawaj w wiadomości danych wrażliwych. Podanie danych jest
+      Do odpowiedzi potrzebuję Twojego adresu e-mail i treści wiadomości. Imię, wybór usługi, budżet, termin oraz kontekst z demonstracji są opcjonalne. Nie podawaj w wiadomości danych wrażliwych. Podanie danych jest
       dobrowolne, ale bez adresu e-mail nie mogę odpowiedzieć przez formularz.
     </p>
     <h2>Cel i podstawa przetwarzania</h2>
@@ -41,6 +40,11 @@ import { Component } from '@angular/core';
       ograniczenia przetwarzania danych, a także przeniesienia danych. Możesz wnieść sprzeciw wobec
       przetwarzania opartego na uzasadnionym interesie i skargę do Prezesa UODO.
     </p>
+    <h2>Google Analytics i wybór zgody</h2>
+    <p>Za Twoją zgodą korzystam z Google Analytics 4 do pomiaru odwiedzin, przyjętych zgłoszeń z formularza oraz kliknięć adresu kontaktowego. Podstawą tej analityki jest zgoda (art. 6 ust. 1 lit. a RODO). Bez zgody tag Google nie jest ładowany. Odrzucenie analityki nie blokuje kontaktu.</p>
+    <p>Dostawcą jest Google Ireland Limited. Google może przetwarzać dane również poza Europejskim Obszarem Gospodarczym zgodnie z zasadami usługi. Pomiar może obejmować identyfikatory przeglądarki, dane urządzenia, odsłony i interakcje. Do Analytics nie przekazuję imienia, adresu e-mail, treści wiadomości ani parametrów zapytania w adresie strony. Reklamowa personalizacja danych jest wyłączona.</p>
+    <p>Po zgodzie Analytics może zapisywać cookies _ga i _ga_*. Ustawiony okres przechowywania danych użytkownika i zdarzeń w usłudze wynosi 2 miesiące. Decyzja o analityce jest zapamiętana lokalnie w przeglądarce do czasu jej zmiany lub usunięcia danych strony. Zgodę możesz wycofać przez „Ustawienia analityki” w stopce; nie wpływa to na zgodność wcześniejszego przetwarzania.</p>
+    <p>Więcej informacji: <a href="https://policies.google.com/technologies/partner-sites?hl=pl">jak Google wykorzystuje dane z witryn</a> oraz <a href="https://policies.google.com/privacy?hl=pl">polityka prywatności Google</a>.</p>
     <h2>Demonstracja i pliki cookies</h2>
     <p>
       Opcjonalna odpowiedź „Skąd o mnie wiesz?” trafia do wiadomości kontaktowej.

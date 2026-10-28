@@ -1,3 +1,4 @@
+import { Analytics } from '../../analytics';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ContactForm } from './contact-form';
@@ -88,5 +89,15 @@ describe('contact form', () => {
     send.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 202 }));
     await form.submit();
     expect(form.state()).toBe('accepted');
+  });
+  it('includes optional project details and measures an accepted enquiry only once', async () => {
+    const { form } = await setup();
+    const event=vi.spyOn(TestBed.inject(Analytics),'event');
+    const send=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response(JSON.stringify({ok:true}),{status:202}));
+    form.email='jan@example.com';form.message='Strona dla firmy';form.service='Strona firmowa';form.budget='Do 3000 zł';form.deadline='W ciągu 1–3 miesięcy';
+    await form.submit();await form.submit();
+    const payload=JSON.parse(send.mock.calls[0][1]!.body as string);
+    expect(payload.context).toContain('Usługa: Strona firmowa');expect(payload.context).toContain('Budżet: Do 3000 zł');expect(payload.context.length).toBeLessThanOrEqual(500);
+    expect(event).toHaveBeenCalledExactlyOnceWith('generate_lead');
   });
 });

@@ -2,10 +2,15 @@
   <section class="hero container" aria-labelledby="hero-title">
     <div
       class="hero-stage"
-      role="img"
-      aria-label="Przestrzenna makieta restauracji reagująca na ruch myszy i przesunięcie palcem"
+      role="group"
+      aria-label="Podgląd makiety restauracji"
     >
-      <app-business-scene industry="gastronomia" [step]="1" [prewarmIndustries]="false" />
+      @if (sceneActive()) {
+        <app-business-scene industry="gastronomia" [step]="1" [prewarmIndustries]="false" />
+      } @else {
+        <img class="hero-preview" src="/images/hero-preview.png" alt="Przestrzenna makieta restauracji z ladą, stolikiem i postacią" width="696" height="560" fetchpriority="high" />
+      }
+      <button class="scene-toggle" type="button" (click)="sceneActive.set(!sceneActive())" [attr.aria-pressed]="sceneActive()">{{ sceneActive() ? 'Zatrzymaj animację' : 'Uruchom animację 3D' }}</button>
     </div>
     <div class="hero-copy">
       <p class="eyebrow">Adam Ułanowski / rozwiązania dla firm</p>

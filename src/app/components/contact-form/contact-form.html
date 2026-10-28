@@ -44,6 +44,18 @@
   @if (errors().email) {
     <p id="email-error" class="field-error">{{ errors().email }}</p>
   }
+  <label for="service">Czego potrzebujesz? <span>(opcjonalnie)</span></label>
+  <select id="service" name="service" [(ngModel)]="service" [disabled]="state() === 'sending' || state() === 'accepted'">
+    <option value="">Jeszcze nie wiem</option><option>Strona firmowa</option><option>Sklep internetowy</option><option>Aplikacja webowa</option><option>Automatyzacja i integracje</option><option>Pilotaż AI</option>
+  </select>
+  <label for="budget">Orientacyjny budżet netto <span>(opcjonalnie)</span></label>
+  <select id="budget" name="budget" [(ngModel)]="budget" [disabled]="state() === 'sending' || state() === 'accepted'">
+    <option value="">Do ustalenia</option><option>Do 3000 zł</option><option>3000–5000 zł</option><option>5000–10 000 zł</option><option>10 000–20 000 zł</option><option>Powyżej 20 000 zł</option>
+  </select>
+  <label for="deadline">Kiedy chcesz zacząć? <span>(opcjonalnie)</span></label>
+  <select id="deadline" name="deadline" [(ngModel)]="deadline" [disabled]="state() === 'sending' || state() === 'accepted'">
+    <option value="">Termin elastyczny</option><option>Możliwie szybko</option><option>W ciągu 1–3 miesięcy</option><option>W późniejszym terminie</option>
+  </select>
   <label for="message">Wiadomość <span>(wymagana)</span></label>
   <textarea
     id="message"

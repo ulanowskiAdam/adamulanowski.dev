@@ -8,7 +8,8 @@ export const serviceDetails: Record<string, {
         "title": "Strona internetowa dla lokalnej firmy ze Szczecina",
         "paragraphs": [
           "Oferta jest skierowana także do firm ze Szczecina i okolic: gabinetów, specjalistów, pracowni i sklepów. W treści ustalamy, jakie usługi oferujesz, na jakim obszarze działasz i jak klient ma przejść od poznania oferty do kontaktu.",
-          "Przykładem strony gabinetu jest Fizjomind w Szczecinie. Realizacja łączy informacje o fizjoterapii i specjalistce z odpowiedziami na pytania oraz przejściem do rezerwacji w Booksy. Zakres strony dopasowujemy do rzeczywistego sposobu obsługi pacjentów."
+          "Przykładem strony gabinetu jest Fizjomind w Szczecinie. Realizacja łączy informacje o fizjoterapii i specjalistce z odpowiedziami na pytania oraz przejściem do rezerwacji w Booksy. Zakres strony dopasowujemy do rzeczywistego sposobu obsługi pacjentów.",
+          "Współpraca odbywa się online: ustalenia, przekazanie materiałów i przegląd kolejnych wersji nie wymagają wizyty w biurze. Oferta jest skierowana do firm ze Szczecina i okolic, a także klientów z innych miejscowości."
         ],
         "links": [
           {
@@ -21,7 +22,8 @@ export const serviceDetails: Record<string, {
         "title": "Ile kosztuje strona firmowa lub sklep internetowy?",
         "paragraphs": [
           "Cena wykonania strony firmowej zaczyna się od 1500 zł netto + VAT, a sklepu internetowego od 4500 zł netto + VAT. Są to ceny startowe; ostateczny koszt ustalam po określeniu zakresu.",
-          "Na wycenę wpływają liczba podstron, przygotowanie materiałów, funkcje sklepu oraz potrzebne połączenia z innymi systemami. Integracje n8n i niestandardowe funkcje wyceniam osobno. Koszty domeny, hostingu, licencji i utrzymania określamy oddzielnie przed rozpoczęciem prac."
+          "Na wycenę wpływają liczba podstron, przygotowanie materiałów, funkcje sklepu oraz potrzebne połączenia z innymi systemami. Integracje n8n i niestandardowe funkcje wyceniam osobno. Koszty domeny, hostingu, licencji i utrzymania określamy oddzielnie przed rozpoczęciem prac.",
+          "Podstawowy zakres strony firmowej to przedstawienie oferty i droga do kontaktu, z układem dopasowanym do telefonu i komputera. Dla sklepu punktem wyjścia są katalog produktów, koszyk i proces zamówienia. Przed wyceną określamy liczbę podstron lub produktów, zakres materiałów oraz konfigurację płatności i dostaw."
         ],
         "items": [
           "Strona firmowa: od 1500 zł netto + VAT.",

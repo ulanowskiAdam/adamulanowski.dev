@@ -1,3 +1,4 @@
+import { Analytics } from '../../analytics';
 import { Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +18,13 @@ export class ContactForm {
   message = '';
   website = '';
   source = '';
+  service = '';
+  budget = '';
+  deadline = '';
+  private readonly analytics = inject(Analytics);
+  private requestContext() {
+    return [this.context().slice(0, 250), this.service && 'Usługa: ' + this.service, this.budget && 'Budżet: ' + this.budget, this.deadline && 'Termin: ' + this.deadline].filter(Boolean).join('\n').slice(0, 500);
+  }
   readonly sources = contactSources;
   readonly context = signal('');
   readonly errors = signal<FieldErrors>({});
@@ -61,7 +69,7 @@ export class ContactForm {
           email: this.email.trim(),
           message: this.message,
           website: this.website,
-          context: this.context(),
+          context: this.requestContext(),
           source: this.source,
         }),
         signal: AbortSignal.timeout(15000),
@@ -69,6 +77,7 @@ export class ContactForm {
       const result = await response.json();
       if (response.ok && result.ok === true) {
         this.state.set('accepted');
+        if (!this.website.trim()) this.analytics.event('generate_lead');
         this.feedback.set(
           'Dziękuję! Zgłoszenie zostało przyjęte do wysłania. To nie jest potwierdzenie dostarczenia wiadomości.',
         );
