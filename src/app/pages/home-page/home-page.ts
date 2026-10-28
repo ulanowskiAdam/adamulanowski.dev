@@ -1,7 +1,7 @@
 import { ScreenshotMockup } from '../../components/screenshot-mockup';
 import { projects } from '../../content/projects';
 import { BusinessScene } from '../../components/experience-hero/business-scene';
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ContactForm } from '../../components/contact-form/contact-form';
 import { TextReveal } from '../../components/text-reveal';
@@ -13,7 +13,6 @@ import { TextReveal } from '../../components/text-reveal';
   styleUrl: './home-page.scss',
 })
 export class HomePage {
-  readonly sceneActive = signal(false);
   readonly projects = projects;
   readonly services = [
 {
