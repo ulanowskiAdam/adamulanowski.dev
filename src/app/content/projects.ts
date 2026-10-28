@@ -1,4 +1,55 @@
 export const projects = [
+{
+  "slug": "loadlift",
+  "name": "LOADLIFT · sklep internetowy",
+  "category": "E-commerce / WooCommerce",
+  "url": "https://loadlift.pl/",
+  "image": "/images/projects/loadlift.png",
+  "teaser": "Sklep z osprzętem do podnoszenia i zabezpieczania ładunków. Katalog techniczny, warianty produktów i proces zakupowy dopasowany do oferty.",
+  "problem": "Jak ułatwić wybór sprzętu technicznego i połączyć sprzedaż internetową z codzienną obsługą zamówień?",
+  "solution": "Rozwój sklepu na WooCommerce obejmuje prezentację produktów, filtrowanie parametrów, wybór wariantów oraz dostosowanie koszyka i formularza zamówienia. Własne rozszerzenia uzupełniają gotową platformę o potrzeby tej oferty.",
+  "features": [
+    "Katalog z parametrami technicznymi i wariantami produktów.",
+    "Dostosowanie procesu zakupowego i danych nabywcy oraz adresu dostawy.",
+    "Układ sklepu dopracowany na komputerach i telefonach.",
+    "Połączenie zamówień z zapleczem obsługi przez n8n."
+  ],
+  "result": "Klient może porównać parametry, dobrać wariant i złożyć zamówienie. Dane zamówienia trafiają dalej do narzędzi wspierających jego realizację.",
+  "imageCaption": "Zrzut działającej strony głównej LOADLIFT, październik 2026.",
+  "relatedSlug": "loadlift-automatyzacje",
+  "relatedLabel": "Zobacz automatyzacje obsługi zamówień w n8n →",
+  "serviceSlug": "strony-internetowe-dla-firm",
+  "serviceLabel": "Poznaj usługę tworzenia stron →"
+},
+{
+  "slug": "loadlift-automatyzacje",
+  "name": "LOADLIFT · automatyzacje w n8n",
+  "category": "Automatyzacja / e-commerce",
+  "url": "https://loadlift.pl/",
+  "image": "/images/projects/loadlift-n8n-sync.png",
+  "teaser": "Połączenie WooCommerce, n8n i ClickUp: synchronizacja zamówień, przygotowanie wiadomości oraz obsługa informacji o fakturach i przesyłkach.",
+  "problem": "Jak ograniczyć ręczne przepisywanie danych pomiędzy sklepem, pocztą i narzędziem do obsługi zamówień, zachowując kontrolę nad błędami?",
+  "solution": "Przepływy w n8n łączą sklep ze wspólną bazą zamówień i ClickUp. Każde zamówienie ma powiązane pozycje, informacje o płatności i dane potrzebne do realizacji. Powtórne zdarzenia są rozpoznawane, a niejednoznaczne wyniki kierowane do sprawdzenia.",
+  "features": [
+    "Synchronizacja zamówienia i jego pozycji do zadań i podzadań w ClickUp.",
+    "Przygotowanie wiadomości z produktami, ilościami i adresem dostawy po potwierdzeniu płatności.",
+    "Integracja z inFakt i przekazywanie informacji o dokumencie do zamówienia.",
+    "Odbiór danych przesyłek z poczty, propozycje dopasowania do zatwierdzenia i monitorowanie statusów."
+  ],
+  "result": "Operator widzi informacje z kilku systemów przy zamówieniu. Zapisane testy potwierdzają synchronizację oraz pojawienie się alertu przesyłki w ClickUp. Część komunikacji dotyczącej faktur i przesyłek była sprawdzana na wewnętrznej skrzynce.",
+  "imageCaption": "Rzeczywisty schemat n8n: synchronizacja zamówień i pozycji z WooCommerce przez bazę OMS do ClickUp.",
+  "gallery": [
+    {
+      "image": "/images/projects/loadlift-n8n-przesylki.png",
+      "alt": "Schemat n8n monitorujący statusy przesyłek i przygotowujący alerty",
+      "caption": "Przepływ monitorowania przesyłek: odczyt statusu, zapis zmian, wykrycie sytuacji wymagającej sprawdzenia i powiadomienie operatora. Zrzut pokazuje schemat wdrożenia; proces działa w zapleczu sklepu."
+    }
+  ],
+  "relatedSlug": "loadlift",
+  "relatedLabel": "Zobacz budowę sklepu LOADLIFT →",
+  "serviceSlug": "automatyzacja-procesow",
+  "serviceLabel": "Poznaj usługę automatyzacji procesów →"
+},
   {
     slug: 'lifting-paulina-karol',
     name: 'Lifting Paulina Karol',
@@ -61,8 +112,8 @@ export const projects = [
   },
 ].map((project) => ({
   ...project,
-  imageSrcset: [240, 320, 480, 640, 960]
+  imageSrcset: project.image.endsWith('.webp') ? [240, 320, 480, 640, 960]
     .map((width) => `${project.image.replace('.webp', `-${width}.webp`)} ${width}w`)
     .concat(`${project.image} 1440w`)
-    .join(', '),
+    .join(', ') : undefined,
 }));

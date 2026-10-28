@@ -9,17 +9,20 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     <h1>{{ project.name }}</h1>
     <p class="lead">{{ project.teaser }}</p>
     <a class="button" [href]="project.url" target="_blank" rel="noopener noreferrer"
-      >Odwiedź stronę ↗ <span class="sr-only">(nowa karta)</span></a
+      >{{ project.slug.startsWith('loadlift') ? 'Zobacz sklep LOADLIFT ↗' : 'Odwiedź stronę ↗' }} <span class="sr-only">(nowa karta)</span></a
     >
     <img
       class="project-screen"
       [src]="project.image"
       [attr.srcset]="project.imageSrcset"
       sizes="(min-width: 1264px) 1184px, (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)"
-      [alt]="'Strona główna ' + project.name"
+      [alt]="'Zrzut realizacji ' + project.name"
       width="1440"
       height="1000"
     />
+    @if (project.imageCaption) {
+      <p class="screen-caption">{{ project.imageCaption }}</p>
+    }
     <div class="project-story">
       <section>
         <p class="eyebrow">01 / Potrzeba</p>
@@ -38,10 +41,27 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       </section>
       <section>
         <p class="eyebrow">03 / Efekt</p>
-        <h2>Co umożliwia strona</h2>
+        <h2>Co umożliwia rozwiązanie</h2>
         <p>{{ project.result }}</p>
       </section>
     </div>
+    @if (project.gallery) {
+      <section class="project-evidence" aria-labelledby="evidence-title">
+        <p class="eyebrow">Przebieg i weryfikacja</p>
+        <h2 id="evidence-title">Automatyzacja w praktyce</h2>
+        @for (screen of project.gallery; track screen.image) {
+          <figure>
+            <a [href]="screen.image" target="_blank" rel="noopener noreferrer" aria-label="Otwórz zrzut w pełnym rozmiarze (nowa karta)">
+              <img [src]="screen.image" [alt]="screen.alt" loading="lazy" width="1480" height="668" />
+            </a>
+            <figcaption>{{ screen.caption }}</figcaption>
+          </figure>
+        }
+      </section>
+    }
+    @if (project.relatedSlug) {
+      <p class="related-project"><a [routerLink]="['/realizacje', project.relatedSlug]">{{ project.relatedLabel }}</a></p>
+    }
     <div class="project-contact">
       <h2>Podobna potrzeba w Twojej firmie?</h2>
       <p>Porozmawiajmy o stronie dopasowanej do Twojej oferty i klientów.</p>
@@ -52,7 +72,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
           fragment="contact"
           [queryParams]="{ context: 'Inspiracja: ' + project.name }"
           >Opowiedz o swoim projekcie</a
-        ><a routerLink="/strony-internetowe-dla-firm">Poznaj usługę tworzenia stron →</a>
+        ><a [routerLink]="'/' + (project.serviceSlug || 'strony-internetowe-dla-firm')">{{ project.serviceLabel || 'Poznaj usługę tworzenia stron →' }}</a>
       </div>
     </div>
     <a routerLink="/" fragment="realizacje">← Wszystkie realizacje</a>
@@ -74,6 +94,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       border-radius: 10px;
       border: 1px solid var(--border);
     }
+    .project-screen { height: auto; }
+    .screen-caption, figcaption { color: var(--muted); line-height: 1.7; max-width: 850px; }
+    .screen-caption { margin-top: -28px; margin-bottom: 48px; }
+    .project-evidence { margin-top: 64px; }
+    figure { margin: 24px 0 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }
+    figcaption { margin-top: 16px; }
+    .related-project { margin-top: 40px; }
     .project-story {
       display: grid;
       gap: 40px;

@@ -118,9 +118,9 @@ export const services = [
         a: 'Przed wdrożeniem szacujemy częstotliwość zadania i czas jego wykonania. Potem porównujemy to z kosztem budowy, usług zewnętrznych i utrzymania.',
       },
     ],
-    project: 'fizjomind',
+    project: 'loadlift-automatyzacje',
     related:
-      'Zobacz punkt wejścia dla klienta na stronie Fizjomind. Przekazywanie zapytań do innych narzędzi jest możliwym kolejnym etapem, a nie deklarowaną funkcją tej realizacji.',
+      'Zobacz automatyzacje LOADLIFT: synchronizację zamówień WooCommerce z ClickUp, przepływy w n8n oraz zapisany test alertu przesyłki.',
   },
   {
     slug: 'integracje-ai',

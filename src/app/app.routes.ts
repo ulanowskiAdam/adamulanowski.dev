@@ -11,7 +11,7 @@ export const routes: Routes = [
   ...projects.map((project) => ({
     path: 'realizacje/' + project.slug,
     loadComponent: () => import('./pages/project-page').then((m) => m.ProjectPage),
-    title: project.name + ' - realizacja strony | Adam Ułanowski',
+    title: project.name + ' - realizacja | Adam Ułanowski',
     data: { description: project.teaser, project },
   })),
   {
