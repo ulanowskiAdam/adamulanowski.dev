@@ -63,7 +63,7 @@ export class Analytics {
   private pageData() {
     let referrer = '';
     try { referrer = new URL(document.referrer).origin; } catch {}
-    const safePaths = new Set(['/', '/regulamin', '/o-mnie', '/polityka-prywatnosci', '/strony-internetowe-dla-firm', '/aplikacje-webowe', '/automatyzacja-procesow', '/integracje-ai', '/demo/konfigurator', '/realizacje/loadlift', '/realizacje/loadlift-automatyzacje', '/realizacje/fizjomind', '/realizacje/lifting-paulina-karol', '/realizacje/kontent-architektura']);
+    const safePaths = new Set(['/', '/sklepy-internetowe-szczecin', '/regulamin', '/o-mnie', '/polityka-prywatnosci', '/strony-internetowe-dla-firm', '/aplikacje-webowe', '/automatyzacja-procesow', '/integracje-ai', '/demo/konfigurator', '/realizacje/loadlift', '/realizacje/loadlift-automatyzacje', '/realizacje/fizjomind', '/realizacje/lifting-paulina-karol', '/realizacje/kontent-architektura']);
     const pathname = location.pathname.replace(/\/$/, '') || '/';
     return { page_title: document.title, page_location: location.origin + (safePaths.has(pathname) ? pathname : '/404'), page_referrer: referrer };
   }

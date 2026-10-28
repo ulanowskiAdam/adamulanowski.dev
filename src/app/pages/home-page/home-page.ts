@@ -15,6 +15,14 @@ export class HomePage {
   readonly sceneActive = signal(false);
   readonly projects = projects;
   readonly services = [
+{
+  "path": "/sklepy-internetowe-szczecin",
+  "title": "Sklepy internetowe",
+  "need": "Chcesz sprzedawać online i sprawnie przekazywać zamówienia do realizacji.",
+  "solution": "Buduję sklepy z katalogiem, koszykiem i procesem zamówienia. Zakres oraz koszty ustalamy przed rozpoczęciem.",
+  "examples": "WooCommerce · warianty produktów · od 4500 zł netto + VAT",
+  "icon": "↗"
+},
     {
       path: '/aplikacje-webowe',
       title: 'Aplikacje webowe',

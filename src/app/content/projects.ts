@@ -18,11 +18,13 @@ export const projects = [
   "imageCaption": "Zrzut działającej strony głównej LOADLIFT, październik 2026.",
   "relatedSlug": "loadlift-automatyzacje",
   "relatedLabel": "Zobacz automatyzacje obsługi zamówień w n8n →",
-  "serviceSlug": "strony-internetowe-dla-firm",
-  "serviceLabel": "Poznaj usługę tworzenia stron →"
+  "serviceSlug": "sklepy-internetowe-szczecin",
+  "serviceLabel": "Poznaj usługę tworzenia sklepów →"
 },
 {
   "slug": "loadlift-automatyzacje",
+"comparison":[{"task":"Zamówienie i produkty","before":"Ręczna obsługa wymaga przeniesienia danych zamówienia i każdej pozycji do narzędzia pracy.","after":"n8n synchronizuje zamówienie i pozycje z WooCommerce przez bazę OMS do zadania i podzadań w ClickUp."},{"task":"Przygotowanie wiadomości","before":"Przy ręcznym przygotowaniu trzeba zebrać produkty, ilości, adres dostawy i sprawdzić płatność.","after":"Przepływ sprawdza płatność i przygotowuje wiadomość z danymi potrzebnymi do realizacji."},{"task":"Dokumenty i przesyłki","before":"Informacje trzeba odszukać w poczcie lub systemie zewnętrznym i przypisać do zamówienia.","after":"Integracje przekazują informacje o dokumencie oraz monitorują statusy przesyłek. Niejednoznaczne dopasowanie wymaga zatwierdzenia."}],
+"evidence":[{"title":"Mój zakres prac","text":"Połączenie WooCommerce, bazy OMS, ClickUp i poczty w przepływach n8n. Zakres obejmuje powiązanie zamówień z pozycjami, przygotowanie komunikacji oraz obsługę informacji o fakturach i przesyłkach."},{"title":"Co zostało sprawdzone?","text":"Zapisane testy potwierdzają synchronizację zamówień i alert przesyłki w ClickUp. Część komunikacji dotyczącej faktur i przesyłek sprawdzano na wewnętrznej skrzynce. Zrzuty pokazują rzeczywiste schematy n8n, a nie publiczną demonstrację procesu."},{"title":"Gdzie pozostaje kontrola człowieka?","text":"Operator zatwierdza niejednoznaczne dopasowania i sprawdza niepewne wyniki operacji. Powtórzone zdarzenia są rozpoznawane, a powiązania danych pozwalają aktualizować istniejące zamówienia zamiast tworzyć duplikaty."}],
   "name": "LOADLIFT · automatyzacje w n8n",
   "category": "Automatyzacja / e-commerce",
   "url": "https://loadlift.pl/",
@@ -110,10 +112,12 @@ export const projects = [
     result:
       'Osoba zainteresowana współpracą może przedstawić zakres projektu już w pierwszym zapytaniu, korzystając z pól dopasowanych do usług architektonicznych.',
   },
-].map((project) => ({
-  ...project,
-  imageSrcset: project.image.endsWith('.webp') ? [240, 320, 480, 640, 960]
-    .map((width) => `${project.image.replace('.webp', `-${width}.webp`)} ${width}w`)
-    .concat(`${project.image} 1440w`)
-    .join(', ') : undefined,
-}));
+].map((project) => {
+  const screenSize = project.image === '/images/projects/loadlift.png' ? [1265, 712] : project.image === '/images/projects/loadlift-n8n-sync.png' ? [871, 594] : undefined;
+  return {
+    ...project,
+    imageWidth: screenSize?.[0] || 1440,
+    imageHeight: screenSize?.[1] || 1000,
+    imageSrcset: screenSize ? [240, 320, 480, 640, 960].filter(width => width < screenSize[0]).map(width => project.image.replace('.png', '-' + width + '.webp') + ' ' + width + 'w').concat(project.image + ' ' + screenSize[0] + 'w').join(', ') : project.image.endsWith('.webp') ? [240, 320, 480, 640, 960].map(width => project.image.replace('.webp', '-' + width + '.webp') + ' ' + width + 'w').concat(project.image + ' 1440w').join(', ') : undefined,
+  };
+});

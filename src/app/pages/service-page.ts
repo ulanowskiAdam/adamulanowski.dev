@@ -13,7 +13,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       routerLink="/"
       fragment="contact"
       [queryParams]="{ context: service.title }"
-      >Opowiedz, co chcesz usprawnić ↗</a
+      >{{ service.slug === 'sklepy-internetowe-szczecin' ? 'Porozmawiajmy o Twoim sklepie ↗' : 'Opowiedz, co chcesz usprawnić ↗' }}</a
     >
     <h2>Jaki problem rozwiązujemy?</h2>
     <p>{{ service.problem }}</p>
@@ -75,8 +75,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     <div class="service-cta">
       <h2>Zacznijmy od Twojej potrzeby.</h2>
       <p>
-        Opisz obecny sposób pracy i to, co chcesz zmienić. Na tej podstawie ustalimy sensowny
-        pierwszy krok.
+        {{ service.slug === 'sklepy-internetowe-szczecin' ? 'Napisz, co sprzedajesz, ile masz produktów i jak chcesz dostarczać zamówienia. Na tej podstawie ustalimy zakres sklepu.' : 'Opisz obecny sposób pracy i to, co chcesz zmienić. Na tej podstawie ustalimy sensowny pierwszy krok.' }}
       </p>
       <a
         class="button primary"

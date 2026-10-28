@@ -4,6 +4,19 @@ export const serviceDetails: Record<string, {
 }> = {
   "strony-internetowe-dla-firm": {
     "sections": [
+{
+  "title": "Co zapisujemy w ofercie przed rozpoczęciem?",
+  "paragraphs": [
+    "Przed potwierdzeniem ceny ustalamy konkretną liczbę podstron, formularzy i wersji językowych. Wskazujemy, które teksty i zdjęcia dostarczasz, a które wymagają osobnego przygotowania. Liczba etapów przeglądu i zakres poprawek są częścią ustaleń.",
+    "Osobno określamy sposób edycji strony po przekazaniu, koszty domeny, hostingu i licencji oraz odpowiedzialność za aktualizacje i kopie zapasowe. Jeśli potrzebujesz późniejszej opieki, zakres i cenę ustalamy przed jej rozpoczęciem."
+  ],
+  "items": [
+    "Lista podstron, funkcji i materiałów.",
+    "Etapy prac, zgłaszanie uwag i kryteria odbioru.",
+    "Harmonogram uwzględniający gotowość materiałów.",
+    "Przekazanie strony, dostępów i zasady utrzymania."
+  ]
+},
       {
         "title": "Strona internetowa dla lokalnej firmy ze Szczecina",
         "paragraphs": [
@@ -19,7 +32,7 @@ export const serviceDetails: Record<string, {
         ]
       },
       {
-        "title": "Ile kosztuje strona firmowa lub sklep internetowy?",
+        "title": "Strona firmowa od 1500 zł netto + VAT — zakres i wycena",
         "paragraphs": [
           "Cena wykonania strony firmowej zaczyna się od 1500 zł netto + VAT, a sklepu internetowego od 4500 zł netto + VAT. Są to ceny startowe; ostateczny koszt ustalam po określeniu zakresu.",
           "Na wycenę wpływają liczba podstron, przygotowanie materiałów, funkcje sklepu oraz potrzebne połączenia z innymi systemami. Integracje n8n i niestandardowe funkcje wyceniam osobno. Koszty domeny, hostingu, licencji i utrzymania określamy oddzielnie przed rozpoczęciem prac.",
@@ -49,7 +62,7 @@ export const serviceDetails: Record<string, {
         ]
       },
       {
-        "title": "Sklep internetowy i funkcje dopasowane do oferty",
+        "title": "Potrzebujesz sprzedaży online? Poznaj ofertę sklepów",
         "paragraphs": [
           "Przy sprzedaży online poza wyglądem strony trzeba zaplanować katalog, parametry produktów, warianty i zakup. W LOADLIFT rozwój sklepu na WooCommerce obejmuje produkty techniczne, filtrowanie, wybór wariantu, koszyk oraz dane nabywcy i dostawy.",
           "Sklep może też wymagać przekazywania zamówień do innych narzędzi. Taki zakres ustalamy oddzielnie od budowy części zakupowej. Przykład połączenia sklepu z n8n i narzędziami obsługi pokazuję w realizacji LOADLIFT."
@@ -58,6 +71,8 @@ export const serviceDetails: Record<string, {
           {
             "path": "/realizacje/loadlift",
             "label": "Zobacz sklep LOADLIFT i zakres prac →"
+          },
+          { "path": "/sklepy-internetowe-szczecin", "label": "Sklepy internetowe od 4500 zł netto + VAT →"
           },
           {
             "path": "/automatyzacja-procesow",

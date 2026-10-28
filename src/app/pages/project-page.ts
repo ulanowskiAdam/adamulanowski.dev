@@ -17,8 +17,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       [attr.srcset]="project.imageSrcset"
       sizes="(min-width: 1264px) 1184px, (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)"
       [alt]="'Zrzut realizacji ' + project.name"
-      width="1440"
-      height="1000"
+      [width]="project.imageWidth"
+      [height]="project.imageHeight"
     />
     @if (project.imageCaption) {
       <p class="screen-caption">{{ project.imageCaption }}</p>
@@ -45,6 +45,24 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         <p>{{ project.result }}</p>
       </section>
     </div>
+    @if (project.comparison) {
+      <section class="comparison" aria-labelledby="comparison-title">
+        <p class="eyebrow">Od ręcznej obsługi do przepływu danych</p>
+        <h2 id="comparison-title">Co przejmuje automatyzacja?</h2>
+        <p>Porównanie z ręcznym wykonaniem tych samych zadań. Pokazuje zakres rozwiązania; nie jest pomiarem zaoszczędzonego czasu.</p>
+        @for (row of project.comparison; track row.task) {
+          <article class="comparison-row"><h3>{{ row.task }}</h3><div class="comparison-columns">
+            <div><h4>Ręczna obsługa</h4><p>{{ row.before }}</p></div>
+            <div><h4>Po wdrożeniu</h4><p>{{ row.after }}</p></div>
+          </div></article>
+        }
+      </section>
+    }
+    @if (project.evidence) {
+      <section class="scope"><h2>Zakres prac i potwierdzenie działania</h2>
+        @for (item of project.evidence; track item.title) { <h3>{{ item.title }}</h3><p>{{ item.text }}</p> }
+      </section>
+    }
     @if (project.gallery) {
       <section class="project-evidence" aria-labelledby="evidence-title">
         <p class="eyebrow">Przebieg i weryfikacja</p>
@@ -52,7 +70,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         @for (screen of project.gallery; track screen.image) {
           <figure>
             <a [href]="screen.image" target="_blank" rel="noopener noreferrer" aria-label="Otwórz zrzut w pełnym rozmiarze (nowa karta)">
-              <img [src]="screen.image" [alt]="screen.alt" loading="lazy" width="1480" height="668" />
+              <img [src]="screen.image" [alt]="screen.alt" loading="lazy" width="871" height="594" />
             </a>
             <figcaption>{{ screen.caption }}</figcaption>
           </figure>
@@ -64,7 +82,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     }
     <div class="project-contact">
       <h2>Podobna potrzeba w Twojej firmie?</h2>
-      <p>Porozmawiajmy o stronie dopasowanej do Twojej oferty i klientów.</p>
+      <p>{{ project.slug === 'loadlift-automatyzacje' ? 'Opisz zadanie, które wykonujesz ręcznie, używane narzędzia i oczekiwany wynik.' : 'Porozmawiajmy o stronie lub sklepie dopasowanym do Twojej oferty i klientów.' }}</p>
       <div class="actions">
         <a
           class="button primary"
@@ -101,6 +119,13 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     figure { margin: 24px 0 0; }
     figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }
     figcaption { margin-top: 16px; }
+    .comparison, .scope { margin-top: 64px; max-width: 100%; }
+    .comparison > p, .scope p, .comparison-row p { color: var(--muted); line-height: 1.8; }
+    .comparison-row { border-top: 1px solid var(--border); padding-block: 24px; }
+    .comparison-row h3, .scope h3 { font-size: 22px; margin-block: 16px; }
+    .comparison-columns { display: grid; gap: 24px; }
+    .comparison-columns h4 { margin-block: 0 12px; }
+    @media (min-width: 768px) { .comparison-columns { grid-template-columns: 1fr 1fr; } }
     .related-project { margin-top: 40px; }
     .project-story {
       display: grid;

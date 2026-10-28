@@ -1,6 +1,109 @@
 import { serviceDetails } from './service-details';
 
 export const services = [
+{
+  "slug": "sklepy-internetowe-szczecin",
+  "title": "Sklepy internetowe dla firm ze Szczecina",
+  "description": "Tworzenie sklepów internetowych dla firm ze Szczecina i okolic od 4500 zł netto + VAT. WooCommerce, katalog produktów, płatności i dostawy. Zobacz LOADLIFT.",
+  "lead": "Od katalogu produktów do zamówienia — sklep dopasowany do Twojej oferty. Od 4500 zł netto + VAT.",
+  "problem": "Klient potrzebuje znaleźć odpowiedni produkt, sprawdzić jego wariant i wygodnie złożyć zamówienie. Firma potrzebuje czytelnych danych do dalszej realizacji. Sam atrakcyjny wygląd sklepu nie rozwiązuje obu tych zadań.",
+  "audience": "Dla firm ze Szczecina i okolic, które rozpoczynają sprzedaż online lub rozwijają obecny sklep. Współpracujemy online, również z klientami z innych miejscowości.",
+  "examples": [
+    "Sklep WooCommerce z kategoriami, kartami produktów i wariantami.",
+    "Koszyk i formularz zamówienia z danymi nabywcy oraz dostawy.",
+    "Dodatkowo wyceniane połączenie sklepu z narzędziami obsługi zamówień."
+  ],
+  "sections": [
+    {
+      "title": "Sklep od 4500 zł netto + VAT — co obejmuje punkt wyjścia?",
+      "paragraphs": [
+        "Punktem wyjścia jest katalog produktów, koszyk i proces składania zamówienia z układem dopasowanym do telefonu i komputera. Cena startowa dotyczy uzgodnionego podstawowego zakresu; przed rozpoczęciem otrzymasz opis prac i wycenę.",
+        "W ofercie określamy liczbę wprowadzanych produktów i kategorii, rodzaje wariantów, źródło opisów i zdjęć oraz wybrane metody płatności i dostawy. Dzięki temu wiadomo, które zadania wykonuję, a jakie materiały przygotowujesz Ty."
+      ],
+      "items": [
+        "Liczba produktów, kategorii i wariantów zapisana w ofercie.",
+        "Lista podstron i funkcji oraz zakres konfiguracji płatności i dostaw.",
+        "Uzgodnione etapy przeglądu sklepu i sposób zgłaszania poprawek."
+      ]
+    },
+    {
+      "title": "Katalog, który pomaga dobrać produkt",
+      "paragraphs": [
+        "Przed budową ustalamy, jak kupujący szuka produktu: według zastosowania, kategorii czy parametrów technicznych. Od tego zależą struktura katalogu, informacje na karcie produktu i potrzebne filtry.",
+        "W sklepie LOADLIFT katalog obejmuje osprzęt do podnoszenia i zabezpieczania ładunków. Praca nad sklepem dotyczyła m.in. parametrów technicznych, wariantów, koszyka i danych do realizacji zamówienia. To przykład wykonanej pracy, a zakres Twojego sklepu ustalamy na podstawie Twoich produktów."
+      ],
+      "links": [
+        {
+          "path": "/realizacje/loadlift",
+          "label": "Zobacz sklep LOADLIFT i zakres prac →"
+        }
+      ]
+    },
+    {
+      "title": "Płatności, dostawa i uruchomienie sprzedaży",
+      "paragraphs": [
+        "Dobieramy dostępne metody płatności i dostawy do oferty, obszaru sprzedaży oraz warunków wybranych dostawców. Przed potwierdzeniem integracji sprawdzam wymagane konta, dostęp do środowiska testowego i ograniczenia techniczne.",
+        "Przed publikacją sprawdzamy wybór wariantu, koszyk, dane zamówienia i przebieg zakupu. Sposób testowania płatności uzgadniamy z uwzględnieniem trybu testowego operatora. Dokumenty sprzedażowe, zasady zwrotów i dane sprzedawcy muszą odpowiadać Twojej działalności; zakres ich przygotowania ustalamy osobno."
+      ]
+    },
+    {
+      "title": "Co wyceniamy osobno?",
+      "paragraphs": [
+        "Przed zawarciem umowy rozdzielamy koszt budowy od kosztów domeny, hostingu, płatnych rozszerzeń i późniejszej opieki. Uwzględniamy również opłaty dostawców płatności i innych usług, jeśli dotyczą wybranego rozwiązania.",
+        "Import dużego katalogu, przygotowanie opisów i zdjęć, dodatkowe wersje językowe, niestandardowe funkcje oraz integracje n8n wymagają określenia osobnego zakresu. Nie zakładam, że cena startowa obejmuje dowolną liczbę produktów i wszystkie możliwe połączenia."
+      ]
+    },
+    {
+      "title": "Automatyzacja po otrzymaniu zamówienia",
+      "paragraphs": [
+        "Budowa części zakupowej i automatyzacja zaplecza to dwa zakresy, które można wdrażać etapami. Najpierw ustalamy poprawny przebieg zakupu, następnie zadania wykonywane po otrzymaniu zamówienia.",
+        "W LOADLIFT n8n łączy WooCommerce ze wspólną bazą zamówień i ClickUp oraz wspiera obsługę informacji o dokumentach i przesyłkach. Pokazuję rzeczywiste schematy przepływów i miejsca wymagające decyzji operatora."
+      ],
+      "links": [
+        {
+          "path": "/realizacje/loadlift-automatyzacje",
+          "label": "Zobacz automatyzacje LOADLIFT w n8n →"
+        },
+        {
+          "path": "/automatyzacja-procesow",
+          "label": "Poznaj usługę automatyzacji procesów →"
+        }
+      ]
+    },
+    {
+      "title": "Co przygotować do rozmowy o sklepie?",
+      "paragraphs": [
+        "Wystarczy informacja, co sprzedajesz, przybliżona liczba produktów, sposób dostawy i planowany rynek. Napisz też, czy masz już opisy, zdjęcia, domenę i sklep, z którego chcesz przenieść dane.",
+        "Na tej podstawie określimy pierwszy zakres, potrzebne materiały i harmonogram. Po wdrożeniu sposób edycji produktów, kopie zapasowe, aktualizacje i dalsze utrzymanie powinny mieć jasno wskazaną odpowiedzialność."
+      ]
+    }
+  ],
+  "process": [
+    "Opisujemy katalog, klientów i przebieg zakupu; ustalamy zakres, materiały i wycenę.",
+    "Buduję sklep, konfiguruję uzgodnione funkcje i udostępniam kolejne etapy do przeglądu.",
+    "Sprawdzamy zamówienia, płatności i dostawy w uzgodnionym trybie; publikujemy i ustalamy przekazanie oraz utrzymanie."
+  ],
+  "faq": [
+    {
+      "q": "Ile kosztuje sklep internetowy?",
+      "a": "Cena zaczyna się od 4500 zł netto + VAT. Końcowa wycena zależy od katalogu, materiałów, funkcji i integracji. Zakres oraz koszty usług zewnętrznych ustalamy przed rozpoczęciem."
+    },
+    {
+      "q": "Czy mogę samodzielnie dodawać produkty?",
+      "a": "W sklepie WooCommerce produkty obsługuje się w panelu administracyjnym. Przed przekazaniem ustalamy potrzebne uprawnienia i zakres instrukcji obsługi."
+    },
+    {
+      "q": "Czy przeniesiesz istniejący sklep?",
+      "a": "Najpierw sprawdzam obecną platformę, eksport produktów i zamówień oraz adresy stron. Migrację i przekierowania wyceniam na podstawie tych danych."
+    },
+    {
+      "q": "Czy w cenie są automatyzacje n8n?",
+      "a": "Integracje i automatyzacje wyceniam osobno. Możemy zaplanować je po uruchomieniu sklepu lub jako uzgodniony etap wspólnego wdrożenia."
+    }
+  ],
+  "project": "loadlift",
+  "related": "LOADLIFT: sklep WooCommerce z katalogiem technicznym, wariantami i procesem zamówienia."
+},
   {
     slug: 'strony-internetowe-dla-firm',
     title: 'Strony internetowe dla firm',
