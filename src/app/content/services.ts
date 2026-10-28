@@ -1,3 +1,5 @@
+import { serviceDetails } from './service-details';
+
 export const services = [
   {
     slug: 'strony-internetowe-dla-firm',
@@ -166,4 +168,4 @@ export const services = [
     related:
       'W portfolio znajdziesz obecnie realizacje stron internetowych. Zakres AI opisany powyżej jest propozycją współpracy. Pierwszym krokiem jest pilotaż z mierzalnymi kryteriami jakości.',
   },
-];
+].map((service) => ({ ...service, ...serviceDetails[service.slug] }));

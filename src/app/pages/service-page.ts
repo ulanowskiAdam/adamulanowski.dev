@@ -25,6 +25,20 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         <li>{{ example }}</li>
       }
     </ul>
+    @for (section of service.sections; track section.title) {
+      <section class="service-detail">
+        <h2>{{ section.title }}</h2>
+        @for (paragraph of section.paragraphs; track paragraph) { <p>{{ paragraph }}</p> }
+        @if (section.items) {
+          <ul>@for (item of section.items; track item) { <li>{{ item }}</li> }</ul>
+        }
+        @if (section.links) {
+          @for (link of section.links; track link.path) {
+            <p><a [routerLink]="link.path">{{ link.label }}</a></p>
+          }
+        }
+      </section>
+    }
     <h2>Jak wygląda współpraca?</h2>
     <ol>
       @for (step of service.process; track step) {
@@ -39,16 +53,18 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       <h2>Po czym poznamy, że działa?</h2>
       <p>{{ service.acceptance }}</p>
     }
-    <h2>Realizacje i demonstracja</h2>
+    <h2>Doświadczenie i przykłady</h2>
     <p>{{ service.related }}</p>
     @if (service.project) {
       <p><a [routerLink]="['/realizacje', service.project]">Poznaj realizację →</a></p>
     }
+    @if (service.slug === 'aplikacje-webowe') {
     <p>
       <a routerLink="/demo/konfigurator">Wypróbuj konfigurator 3D →</a>
       Własne demo interfejsu: wybierz branżę i dodatki, a następnie przekaż wybór do formularza.
       Demo nie realizuje rezerwacji ani zapytań do modelu AI.
     </p>
+    }
     <h2>Częste pytania</h2>
     @for (item of service.faq; track item.q) {
       <details>
@@ -73,6 +89,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     <a routerLink="/" fragment="uslugi">← Wszystkie usługi</a>
   </main>`,
   styles: `
+    .service-detail { margin-block: 40px; }
+    .service-detail p { line-height: 1.8; }
     .service-lead {
       font-size: 24px;
     }

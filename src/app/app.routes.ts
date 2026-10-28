@@ -17,10 +17,10 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./pages/home-page/home-page').then((m) => m.HomePage),
-    title: 'Strony, aplikacje i automatyzacje - Adam Ułanowski',
+    title: 'Strony internetowe i automatyzacje Szczecin | Adam Ułanowski',
     data: {
       description:
-        'Strony internetowe, aplikacje webowe, automatyzacje procesów i integracje AI dla Twojej firmy. Opowiedz, czego potrzebujesz - pomogę dobrać rozwiązanie.',
+        'Strony internetowe, sklepy i automatyzacje dla firm ze Szczecina i okolic. Zobacz realizacje i porozmawiaj o stronie, aplikacji lub integracji narzędzi.',
     },
   },
   {
