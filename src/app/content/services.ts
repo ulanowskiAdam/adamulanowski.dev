@@ -32,7 +32,7 @@ export const services = [
       },
       {
         q: 'Ile kosztuje wykonanie strony?',
-        a: 'Cena zależy od liczby podstron, materiałów i funkcji. Po rozmowie otrzymasz zakres i wycenę przed rozpoczęciem prac.',
+        a: 'Strona firmowa kosztuje od 1500 zł netto + VAT, a sklep internetowy od 4500 zł netto + VAT. Ostateczna cena zależy od liczby podstron, materiałów, funkcji i integracji. Zakres oraz wycenę ustalamy przed rozpoczęciem prac.',
       },
       {
         q: 'Czy mogę samodzielnie zmieniać treści?',

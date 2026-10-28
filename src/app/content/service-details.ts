@@ -18,6 +18,17 @@ export const serviceDetails: Record<string, {
         ]
       },
       {
+        "title": "Ile kosztuje strona firmowa lub sklep internetowy?",
+        "paragraphs": [
+          "Cena wykonania strony firmowej zaczyna się od 1500 zł netto + VAT, a sklepu internetowego od 4500 zł netto + VAT. Są to ceny startowe; ostateczny koszt ustalam po określeniu zakresu.",
+          "Na wycenę wpływają liczba podstron, przygotowanie materiałów, funkcje sklepu oraz potrzebne połączenia z innymi systemami. Integracje n8n i niestandardowe funkcje wyceniam osobno. Koszty domeny, hostingu, licencji i utrzymania określamy oddzielnie przed rozpoczęciem prac."
+        ],
+        "items": [
+          "Strona firmowa: od 1500 zł netto + VAT.",
+          "Sklep internetowy: od 4500 zł netto + VAT."
+        ]
+      },
+      {
         "title": "Tworzenie strony firmowej: od oferty do kontaktu",
         "paragraphs": [
           "Strona firmowa powinna pomóc odbiorcy ustalić, czy trafił do właściwej osoby. Dlatego zaczynam od usług, odbiorców i pytań, które pojawiają się przed pierwszym kontaktem. Na tej podstawie ustalam podział na podstrony, kolejność informacji oraz miejsca na formularz lub dane kontaktowe.",
@@ -68,7 +79,7 @@ export const serviceDetails: Record<string, {
       }
     ],
     "title": "Tworzenie stron internetowych dla firm w Szczecinie",
-    "description": "Strony internetowe dla firm ze Szczecina i okolic. Strony usługowe, portfolio i sklepy WooCommerce: zakres, realizacje i przygotowanie do Google.",
+    "description": "Strony internetowe dla firm ze Szczecina i okolic od 1500 zł netto + VAT. Sklepy od 4500 zł netto + VAT. Zobacz zakres prac i realizacje.",
     "lead": "Tworzę strony dla firm ze Szczecina i okolic: od przedstawienia oferty po kontakt lub zamówienie."
   },
   "aplikacje-webowe": {
