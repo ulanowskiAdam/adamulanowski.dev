@@ -1,9 +1,10 @@
+import { ScreenshotMockup } from '../components/screenshot-mockup';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-project-page',
-  imports: [RouterLink],
+  imports: [RouterLink, ScreenshotMockup],
   template: `<main id="main" class="container project-page" tabindex="-1">
     <p class="eyebrow">Realizacje / {{ project.category }}</p>
     <h1>{{ project.name }}</h1>
@@ -11,14 +12,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
     <a class="button" [href]="project.url" target="_blank" rel="noopener noreferrer"
       >{{ project.slug.startsWith('loadlift') ? 'Zobacz sklep LOADLIFT ↗' : 'Odwiedź stronę ↗' }} <span class="sr-only">(nowa karta)</span></a
     >
-    <img
-      class="project-screen"
-      [src]="project.image"
-      [attr.srcset]="project.imageSrcset"
-      sizes="(min-width: 1264px) 1184px, (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)"
-      [alt]="'Zrzut realizacji ' + project.name"
-      [width]="project.imageWidth"
-      [height]="project.imageHeight"
+    <app-screenshot-mockup class="project-mockup"
+      [src]="project.image" [srcset]="project.imageSrcset"
+      [width]="project.imageWidth" [height]="project.imageHeight"
+      [alt]="'Zrzut realizacji ' + project.name" [fullSize]="true" [eager]="true"
+      [workflow]="project.slug === 'loadlift-automatyzacje'"
+      [label]="project.slug === 'loadlift-automatyzacje' ? 'n8n / Synchronizacja zamówień LOADLIFT' : project.url.replace('https://', '').replace('www.', '').replace('/', '')"
     />
     @if (project.imageCaption) {
       <p class="screen-caption">{{ project.imageCaption }}</p>
@@ -69,9 +68,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
         <h2 id="evidence-title">Automatyzacja w praktyce</h2>
         @for (screen of project.gallery; track screen.image) {
           <figure>
-            <a [href]="screen.image" target="_blank" rel="noopener noreferrer" aria-label="Otwórz zrzut w pełnym rozmiarze (nowa karta)">
-              <img [src]="screen.image" [alt]="screen.alt" loading="lazy" width="871" height="594" />
-            </a>
+            <app-screenshot-mockup [src]="screen.image" [alt]="screen.alt" [width]="871" [height]="594" [fullSize]="true" [workflow]="true" [shipping]="true" label="n8n / Monitorowanie przesyłek LOADLIFT" [srcset]="screen.image.replace('.png', '-320.webp') + ' 320w, ' + screen.image.replace('.png', '-640.webp') + ' 640w, ' + screen.image + ' 871w'" />
             <figcaption>{{ screen.caption }}</figcaption>
           </figure>
         }
@@ -105,16 +102,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
       color: var(--muted);
       margin-block: 24px;
     }
-    .project-screen {
-      display: block;
-      width: 100%;
-      margin-block: 48px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .project-screen { height: auto; }
+    .project-mockup { margin-block:40px 24px; }
     .screen-caption, figcaption { color: var(--muted); line-height: 1.7; max-width: 850px; }
-    .screen-caption { margin-top: -28px; margin-bottom: 48px; }
+    .screen-caption { margin-top: 16px; margin-bottom: 48px; }
     .project-evidence { margin-top: 64px; }
     figure { margin: 24px 0 0; }
     figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; }

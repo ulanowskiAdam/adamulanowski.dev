@@ -1,3 +1,4 @@
+import { ScreenshotMockup } from '../../components/screenshot-mockup';
 import { projects } from '../../content/projects';
 import { BusinessScene } from '../../components/experience-hero/business-scene';
 import { Component, signal } from '@angular/core';
@@ -7,7 +8,7 @@ import { TextReveal } from '../../components/text-reveal';
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink, ContactForm, BusinessScene, TextReveal],
+  imports: [RouterLink, ContactForm, BusinessScene, TextReveal, ScreenshotMockup],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
 })

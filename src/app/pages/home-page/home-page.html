@@ -2,6 +2,7 @@
   <section class="hero container" aria-labelledby="hero-title">
     <div
       class="hero-stage"
+      [class.scene-active]="sceneActive()"
       role="group"
       aria-label="Podgląd makiety restauracji"
     >
@@ -44,14 +45,13 @@
               [routerLink]="['/realizacje', project.slug]"
               [attr.aria-label]="'Poznaj realizację: ' + project.name"
             >
-              <img
-                [src]="project.image"
-                [attr.srcset]="project.imageSrcset"
-                sizes="(min-width: 1264px) 379px, (min-width: 900px) calc((100vw - 128px) / 3), (min-width: 768px) calc(100vw - 80px), calc(100vw - 40px)"
-                [alt]="'Zrzut realizacji ' + project.name"
-                [width]="project.imageWidth"
-                [height]="project.imageHeight"
-                loading="lazy"
+              <app-screenshot-mockup
+                [src]="project.image" [srcset]="project.imageSrcset"
+                [width]="project.imageWidth" [height]="project.imageHeight"
+                [alt]="'Zrzut realizacji ' + project.name" [compact]="true"
+                [workflow]="project.slug === 'loadlift-automatyzacje'"
+                [label]="project.slug === 'loadlift-automatyzacje' ? 'n8n / LOADLIFT' : project.url.replace('https://', '').replace('www.', '').replace('/', '')"
+                sizes="(min-width: 1264px) 345px, (min-width: 900px) calc((100vw - 230px) / 3), (min-width: 768px) calc(100vw - 115px), calc(100vw - 76px)"
               />
             </a>
             <div class="work-copy">
