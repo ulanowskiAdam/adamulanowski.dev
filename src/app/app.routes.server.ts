@@ -5,6 +5,7 @@ export const serverRoutes: ServerRoute[] = [
   ...[
     '',
     'o-mnie',
+    'regulamin',
     'polityka-prywatnosci',
     'demo/konfigurator',
     ...services.map((s) => s.slug),

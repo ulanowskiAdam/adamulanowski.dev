@@ -9,6 +9,7 @@ export { SiteHeader } from './site-header';
   template: `<footer class="container">
     <span>© {{ year }} Adam Ułanowski</span>
     <nav aria-label="Linki w stopce">
+      <a routerLink="/regulamin">Regulamin</a>
       <a routerLink="/polityka-prywatnosci">Polityka prywatności</a
       ><a href="https://github.com/ulanowskiAdam">GitHub ↗</a
       ><a routerLink="/" fragment="configurator">Interaktywne demo</a><button type="button" (click)="analytics.visible.set(true)">Ustawienia analityki</button>

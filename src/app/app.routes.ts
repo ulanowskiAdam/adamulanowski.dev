@@ -33,6 +33,12 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'regulamin',
+    loadComponent: () => import('./pages/terms-page').then((m) => m.TermsPage),
+    title: 'Regulamin korzystania ze strony - Adam Ułanowski',
+    data: { description: 'Zasady korzystania z formularza kontaktowego i demonstracji na adamulanowski.dev.' },
+  },
+  {
     path: 'polityka-prywatnosci',
     loadComponent: () => import('./pages/privacy-page').then((m) => m.PrivacyPage),
     title: 'Polityka prywatności - Adam Ułanowski',
